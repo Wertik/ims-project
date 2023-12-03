@@ -28,7 +28,7 @@ test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) $(ARGS)
 
 clean:
 	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) sdl.o

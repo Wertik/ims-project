@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
           printf("invalid map %s, range: <%d; %d>\n", optarg, 0, MAP_COUNT);
           return EXIT_FAILURE;
         }
+        map = m;
         break;
       }
       case 'p':
