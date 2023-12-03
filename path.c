@@ -25,13 +25,24 @@ int main(int argc, char *argv[]) {
 
   bool start_paused = false;
 
-  while ((opt = getopt(argc, argv, "ph")) != -1) {
+  map_e map = SINGLE_INTER;
+
+  while ((opt = getopt(argc, argv, "phm:")) != -1) {
     switch (opt) {
       case 'h':
         printf(
-            "Usage: ./path [-h] [-p]\n\n-h get help\n-p start the simulation "
-            "paused\n");
+            "Usage: ./path [-h] [-p] [-m MAP]\n\n-h get help\n-p start the simulation "
+            "paused\n-m MAP id of map to use for the simulation (enum "
+            "map_e)\n");
         return EXIT_SUCCESS;
+      case 'm': {
+        int m = atoi(optarg);
+        if (m >= MAP_COUNT || m < 0) {
+          printf("invalid map %s, range: <%d; %d>\n", optarg, 0, MAP_COUNT);
+          return EXIT_FAILURE;
+        }
+        break;
+      }
       case 'p':
         start_paused = true;
         break;
@@ -53,7 +64,7 @@ int main(int argc, char *argv[]) {
                             .entities = create_entity_list(),
                             .intersections = create_inter_list()};
 
-  build_map(&data);
+  build_map(&data, map);
 
   // init random
 

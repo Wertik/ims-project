@@ -42,8 +42,8 @@ void build_intersection(simulation_data_t *data, position_t parts[],
   add_inter(data->intersections, inter);
 }
 
-void build_map(simulation_data_t *data) {
-  map_e map = MULTI_ROAD;
+void build_map(simulation_data_t *data, map_e map) {
+  printf("Building map %d...\n", map);
 
   switch (map) {
     case MULTI_ROAD:
@@ -77,8 +77,7 @@ void build_map(simulation_data_t *data) {
 
       // -- add cars
 
-      create_entities(data->entities,
-                      (position_t[]){{9, 10}, {16, 13}}, 2,
+      create_entities(data->entities, (position_t[]){{9, 10}, {16, 13}}, 2,
                       creator_car);
       break;
     case SINGLE_INTER:

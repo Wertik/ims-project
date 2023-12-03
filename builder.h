@@ -17,6 +17,7 @@ typedef enum {
     ROAD_DIR,
     MULTI_ROAD,
     MULTI_INTER,
+    MAP_COUNT,
 } map_e;
 
-void build_map(simulation_data_t *data);
+void build_map(simulation_data_t *data, map_e map);
