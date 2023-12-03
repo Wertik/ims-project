@@ -12,6 +12,23 @@ bool cmp_pos(position_t a, position_t b) { return a.x == b.x && a.y == b.y; }
 
 void print_pos(position_t pos) { printf("[%d;%d]\n", pos.x, pos.y); }
 
+direction_e inverse_dir(direction_e dir) {
+  // direction enum not done properly, have to use a switch here
+  switch (dir) {
+    case DIR_UP:
+      return DIR_DOWN;
+    case DIR_DOWN:
+      return DIR_UP;
+    case DIR_RIGHT:
+      return DIR_LEFT;
+    case DIR_LEFT:
+      return DIR_RIGHT;
+    case DIR_COUNT:
+      printf("inverse_dir: invalid direction index.\n");
+      exit(EXIT_FAILURE);
+  }
+}
+
 position_t add_dir(position_t pos, direction_e direction) {
   switch (direction) {
     case DIR_UP:

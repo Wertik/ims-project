@@ -43,30 +43,76 @@ void build_intersection(simulation_data_t *data, position_t parts[],
 }
 
 void build_map(simulation_data_t *data) {
-  // -- build roads
+  map_e map = ROAD_DIR;
 
-  build_road(data, (position_t[]){{9, 10}, {10, 10}, {11, 10}, {12, 10}}, 4,
-             DIR_RIGHT);
+  switch (map) {
+    case SINGLE_INTER:
+      // -- build roads
 
-  build_road(data, (position_t[]){{13, 11}, {13, 12}, {13, 13}}, 3, DIR_DOWN);
+      build_road(data, (position_t[]){{9, 10}, {10, 10}, {11, 10}, {12, 10}}, 4,
+                 DIR_RIGHT);
 
-  build_road(data, (position_t[]){{13, 9}, {13, 8}, {13, 7}}, 3, DIR_UP);
+      build_road(data, (position_t[]){{13, 11}, {13, 12}, {13, 13}}, 3,
+                 DIR_DOWN);
 
-  // -- build intersections
+      build_road(data, (position_t[]){{13, 9}, {13, 8}, {13, 7}}, 3, DIR_UP);
 
-  build_intersection(data,
-                     // parts
-                     (position_t[]){{13, 10}}, 1,
-                     // wait spots
-                     (inter_spot_data_t[]){{.pos = {12, 10}, .dir = DIR_LEFT}},
-                     1);
+      // -- build intersections
 
-  // -- add parking spots
+      build_intersection(
+          data,
+          // parts
+          (position_t[]){{13, 10}}, 1,
+          // wait spots
+          (inter_spot_data_t[]){{.pos = {12, 10}, .dir = DIR_LEFT}}, 1);
 
-  create_entities(data->entities, (position_t[]){{13, 14}, {13, 6}}, 2,
-                  creator_parking);
+      // -- add parking spots
 
-  // -- add cars
+      create_entities(data->entities, (position_t[]){{13, 14}, {13, 6}}, 2,
+                      creator_parking);
 
-  create_entities(data->entities, (position_t[]){{9, 10}}, 1, creator_car);
+      // -- add cars
+
+      create_entities(data->entities, (position_t[]){{9, 10}}, 1, creator_car);
+      break;
+    case ROAD_DIR:
+      // test road option picking for allowed directions on road tiles
+
+      // -- build roads
+
+      build_road(data,
+                 (position_t[]){{9, 10},
+                                {10, 10},
+                                {11, 10},
+                                {12, 10},
+                                {13, 10},
+                                {14, 10},
+                                {15, 10}},
+                 7, DIR_RIGHT);
+
+      // shouldn't be chosen
+      build_road(data, (position_t[]){{10, 9}, {10, 8}}, 2, DIR_DOWN);
+
+      // shouldn't be chosen
+      build_road(data, (position_t[]){{12, 11}, {12, 12}}, 2, DIR_UP);
+
+      // allowed (but has only a chance)
+      build_road(data, (position_t[]){{14, 9}, {14, 8}}, 2, DIR_UP);
+
+      // a turn
+      build_road(data, (position_t[]){{16, 10}, {16, 11}}, 2, DIR_DOWN);
+
+      // -- add parking spots
+
+      // parking lots at the end to stop the simulation
+      create_entities(data->entities, (position_t[]){{16, 12}, {14, 7}}, 2,
+                      creator_parking);
+
+      // -- add cars
+      create_entities(data->entities, (position_t[]){{9, 10}}, 1, creator_car);
+      break;
+    default:
+      printf("build_map: Invalid map chosen.\n");
+      exit(EXIT_FAILURE);
+  }
 }

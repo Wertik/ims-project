@@ -11,4 +11,10 @@ typedef struct {
     direction_e dir;
 } inter_spot_data_t;
 
+// different maps
+typedef enum {
+    SINGLE_INTER = 0,
+    ROAD_DIR,
+} map_e;
+
 void build_map(simulation_data_t *data);

@@ -6,15 +6,6 @@
 #include "entity.h"
 #include "simulation.h"
 
-// grid settings
-#define GRID_HEIGHT 32
-#define GRID_WIDTH 32
-
-#define GRID_SIZE GRID_WIDTH *GRID_HEIGHT
-
-// real cell size
-#define CELL_SIZE 20
-
 // padding between the cell color and the edges
 // has to be even
 #define PADDING 4

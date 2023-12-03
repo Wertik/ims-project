@@ -33,4 +33,6 @@ bool cmp_pos(position_t a, position_t b);
 position_t add_dir(position_t pos, direction_e direction);
 position_t set_dir(position_t pos, direction_e direction);
 
+direction_e inverse_dir(direction_e dir);
+
 void print_pos(position_t pos);
