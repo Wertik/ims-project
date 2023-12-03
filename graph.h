@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "entity.h"
+#include "simulation.h"
 
 // grid settings
 #define GRID_HEIGHT 32
@@ -34,8 +35,20 @@
 #define ROAD_COLOR \
   (SDL_Color) { 168, 168, 168, 255 }
 
+#define ROAD_EDGE_COLOR \
+  (SDL_Color) { 255, 0, 0, 255 }
+
+#define INTERSECTION_EDGE_COLOR \
+  (SDL_Color) { 0, 255, 0, 255 }
+
+#define INTERSECTION_SPOT_EDGE_COLOR \
+  (SDL_Color) { 0, 0, 255, 255 }
+
 #define ROAD_INDICATOR_WIDTH 4
-#define ROAD_INDICATOR_HEIGHT 8
+#define ROAD_INDICATOR_HEIGHT 4
+
+#define INDICATOR_COLOR \
+  (SDL_Color) { 0, 255, 0, 255 }
 
 #define CAR_COLOR \
   (SDL_Color) { 255, 0, 0, 255 }
@@ -50,4 +63,4 @@ void initialize_SDL(SDL_Window **window, SDL_Renderer **renderer);
 
 void close_SDL(SDL_Window *window, SDL_Renderer *renderer);
 
-void draw(SDL_Renderer *renderer, entity_list_t *entities);
+void draw(SDL_Renderer *renderer, simulation_data_t *data);

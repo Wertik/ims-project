@@ -13,8 +13,6 @@ typedef enum {
   PARKING,
 } entity_type_e;
 
-typedef enum { UP, DOWN, RIGHT, LEFT } direction_e;
-
 typedef struct {
   entity_type_e type;
 
@@ -42,6 +40,18 @@ typedef struct {
 } car_t;
 
 typedef struct {
+  entity_type_e type;
+
+  position_t pos;
+
+  bool c_override;
+  SDL_Color color;
+
+  // forced road cell direction, if any
+  direction_e direction;
+} e_road_t;
+
+typedef struct {
   unsigned int size;
   entity_t **entities;
 } entity_list_t;
@@ -60,6 +70,9 @@ void free_entity_list(entity_list_t *list);
 entity_t *create_entity(position_t pos);
 void free_entity(entity_t *entity);
 
+e_road_t *create_road_entity(position_t pos);
+void free_road_entity(e_road_t *road);
+
 car_t *create_car(position_t pos);
 void free_car(car_t *car);
 
@@ -68,3 +81,7 @@ void print_car(car_t *car, bool nl);
 
 void create_entities(entity_list_t *list, position_t positions[], int count,
                      creator_fn_t creator_fn);
+
+entity_t *creator_road(position_t pos);
+entity_t *creator_parking(position_t pos);
+entity_t *creator_car(position_t pos);

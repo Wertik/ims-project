@@ -31,10 +31,10 @@ entity_t *get_entity(entity_list_t *list, position_t pos) {
 }
 
 entity_t **get_surroundings(entity_list_t *list, position_t pos) {
-  entity_t **res = (entity_t **)malloc(sizeof(entity_t *) * IDX_COUNT);
+  entity_t **res = (entity_t **)malloc(sizeof(entity_t *) * DIR_COUNT);
   MERROR(res);
 
-  bzero(res, sizeof(entity_t *) * IDX_COUNT);
+  memset(res, 0, sizeof(entity_t *) * DIR_COUNT);
 
   for (unsigned int i = 0; i < list->size; i++) {
     entity_t *e = list->entities[i];
@@ -42,20 +42,20 @@ entity_t **get_surroundings(entity_list_t *list, position_t pos) {
     // is 1 above the position?
     if (e->pos.x == pos.x) {
       if (e->pos.y == pos.y - 1) {
-        res[IDX_UP] = e;
+        res[DIR_UP] = e;
         continue;
       } else if (e->pos.y == pos.y + 1) {
-        res[IDX_DOWN] = e;
+        res[DIR_DOWN] = e;
         continue;
       }
     }
 
     if (e->pos.y == pos.y) {
       if (e->pos.x == pos.x - 1) {
-        res[IDX_LEFT] = e;
+        res[DIR_LEFT] = e;
         continue;
       } else if (e->pos.x == pos.x + 1) {
-        res[IDX_RIGHT] = e;
+        res[DIR_RIGHT] = e;
         continue;
       }
     }
@@ -81,7 +81,18 @@ void del_entity(entity_list_t *list, unsigned int idx) {
 
 void free_entity_list(entity_list_t *list) {
   for (unsigned int i = 0; i < list->size; i++) {
-    free_entity(list->entities[i]);
+    entity_t *e = list->entities[i];
+    switch (e->type) {
+      case EMPTY_ROAD:
+        free_road_entity((e_road_t *)e);
+        break;
+      case CAR:
+        free_car((car_t *)e);
+        break;
+      default:
+        free_entity(e);
+        break;
+    }
   }
   free(list->entities);
   free(list);
@@ -97,6 +108,20 @@ entity_t *create_entity(position_t pos) {
   return entity;
 }
 
+e_road_t *create_road_entity(position_t pos) {
+  e_road_t *road = (e_road_t *)malloc(sizeof(e_road_t));
+  MERROR(road);
+
+  road->pos = pos;
+  road->type = EMPTY_ROAD;
+  road->direction = DIR_COUNT;
+  road->c_override = false;
+
+  return road;
+}
+
+void free_road_entity(e_road_t *e) { free(e); }
+
 car_t *create_car(position_t pos) {
   car_t *car = (car_t *)malloc(sizeof(car_t));
   MERROR(car);
@@ -110,6 +135,7 @@ car_t *create_car(position_t pos) {
 
   return car;
 }
+
 void free_car(car_t *car) { free(car); }
 
 void print_car(car_t *car, bool nl) {
@@ -126,7 +152,6 @@ void free_entity(entity_t *entity) { free(entity); }
 
 void create_entities(entity_list_t *list, position_t positions[], int count,
                      creator_fn_t creator_fn) {
-
   for (int i = 0; i < count; i++) {
     position_t pos = positions[i];
 
@@ -134,4 +159,25 @@ void create_entities(entity_list_t *list, position_t positions[], int count,
 
     add_entity(list, e);
   }
+}
+
+entity_t *creator_road(position_t pos) {
+  e_road_t *road = create_road_entity(pos);
+  road->direction = DIR_COUNT;
+  return (entity_t*)road;
+}
+
+entity_t *creator_parking(position_t pos) {
+  entity_t *entity = create_entity(pos);
+  entity->type = PARKING;
+  return entity;
+}
+
+entity_t *creator_car(position_t pos) {
+  car_t *car = create_car(pos);
+
+  // set the car moving 1m right per tick
+  car->speed = (position_t){.x = 1, .y = 0};
+
+  return (entity_t *)car;
 }

@@ -12,44 +12,44 @@ bool cmp_pos(position_t a, position_t b) { return a.x == b.x && a.y == b.y; }
 
 void print_pos(position_t pos) { printf("[%d;%d]\n", pos.x, pos.y); }
 
-position_t add_dir(position_t pos, dir_index_e direction) {
+position_t add_dir(position_t pos, direction_e direction) {
   switch (direction) {
-    case IDX_UP:
+    case DIR_UP:
       pos.y += -1;
       break;
-    case IDX_DOWN:
+    case DIR_DOWN:
       pos.y += 1;
       break;
-    case IDX_RIGHT:
+    case DIR_RIGHT:
       pos.x += +1;
       break;
-    case IDX_LEFT:
+    case DIR_LEFT:
       pos.x += -1;
       break;
-    case IDX_COUNT:
+    case DIR_COUNT:
       printf("Invalid direction index.\n");
       exit(EXIT_FAILURE);
   }
   return pos;
 }
 
-position_t set_dir(position_t pos, dir_index_e direction) {
+position_t set_dir(position_t pos, direction_e direction) {
   pos.x = 0;
   pos.y = 0;
   switch (direction) {
-    case IDX_UP:
+    case DIR_UP:
       pos.y = -1;
       break;
-    case IDX_DOWN:
+    case DIR_DOWN:
       pos.y = 1;
       break;
-    case IDX_RIGHT:
+    case DIR_RIGHT:
       pos.x = +1;
       break;
-    case IDX_LEFT:
+    case DIR_LEFT:
       pos.x = -1;
       break;
-    case IDX_COUNT:
+    case DIR_COUNT:
       printf("Invalid direction index.\n");
       exit(EXIT_FAILURE);
   }

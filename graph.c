@@ -16,17 +16,74 @@ void close_SDL(SDL_Window *window, SDL_Renderer *renderer) {
   SDL_Quit();
 }
 
-void render_road(SDL_Renderer *renderer, cord_t x, cord_t y) {
-  SDL_Rect rect = {.x = x + CELL_SIZE / 2 - ROAD_INDICATOR_WIDTH / 2,
-                   .y = y + PADDING / 2,
-                   .w = ROAD_INDICATOR_WIDTH,
-                   .h = ROAD_INDICATOR_HEIGHT};
+void render_dir_indicator(SDL_Renderer *renderer, cord_t pos_x, cord_t pos_y,
+                          direction_e dir, bool padding) {
+  int x, y, w, h;
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  switch (dir) {
+    case DIR_UP: {
+      x = pos_x * CELL_SIZE + CELL_SIZE / 2 - ROAD_INDICATOR_WIDTH / 2;
+      y = pos_y * CELL_SIZE + (padding ? PADDING / 2 : 0);
+      w = ROAD_INDICATOR_WIDTH;
+      h = ROAD_INDICATOR_HEIGHT;
+      break;
+    }
+    case DIR_DOWN: {
+      x = pos_x * CELL_SIZE + CELL_SIZE / 2 - ROAD_INDICATOR_WIDTH / 2;
+      y = pos_y * CELL_SIZE - (padding ? PADDING / 2 : 0) + CELL_SIZE -
+          ROAD_INDICATOR_WIDTH;
+      w = ROAD_INDICATOR_WIDTH;
+      h = ROAD_INDICATOR_HEIGHT;
+      break;
+    }
+    case DIR_LEFT: {
+      x = pos_x * CELL_SIZE + (padding ? PADDING / 2 : 0);
+      y = pos_y * CELL_SIZE + CELL_SIZE / 2 - ROAD_INDICATOR_WIDTH / 2;
+      w = ROAD_INDICATOR_HEIGHT;
+      h = ROAD_INDICATOR_WIDTH;
+      break;
+    }
+    case DIR_RIGHT: {
+      x = pos_x * CELL_SIZE + CELL_SIZE - (padding ? PADDING / 2 : 0) -
+          ROAD_INDICATOR_HEIGHT;
+      y = pos_y * CELL_SIZE + CELL_SIZE / 2 - ROAD_INDICATOR_WIDTH / 2;
+      w = ROAD_INDICATOR_HEIGHT;
+      h = ROAD_INDICATOR_WIDTH;
+      break;
+    }
+    default: {
+      // no direction set
+      return;
+    }
+  }
+
+  SDL_Rect rect = {x, y, w, h};
+
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 /* RGBA(INDICATOR_COLOR) */);
   SDL_RenderFillRect(renderer, &rect);
 }
 
-void draw(SDL_Renderer *renderer, entity_list_t *entities) {
+void render_entity(SDL_Renderer *renderer, entity_t *entity, SDL_Color color,
+                   bool padding) {
+  SDL_Color real_color = entity->c_override ? entity->color : color;
+  SDL_SetRenderDrawColor(renderer, RGBA(real_color));
+
+  SDL_Rect rect = {.x = entity->pos.x * CELL_SIZE,
+                   .y = entity->pos.y * CELL_SIZE,
+                   .w = CELL_SIZE,
+                   .h = CELL_SIZE};
+
+  if (padding) {
+    rect.x = rect.x + PADDING / 2;
+    rect.y = rect.y + PADDING / 2;
+    rect.w = rect.w - PADDING;
+    rect.h = rect.h - PADDING;
+  }
+
+  SDL_RenderFillRect(renderer, &rect);
+}
+
+void draw(SDL_Renderer *renderer, simulation_data_t *data) {
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   SDL_RenderClear(renderer);
 
@@ -46,49 +103,90 @@ void draw(SDL_Renderer *renderer, entity_list_t *entities) {
   }
 
   // render entities
-  for (unsigned int i = 0; i < entities->size; i++) {
-    entity_t *entity = entities->entities[i];
-
-    bool padding = true;
-    SDL_Color color;
+  for (unsigned int i = 0; i < data->entities->size; i++) {
+    entity_t *entity = data->entities->entities[i];
 
     switch (entity->type) {
       case EMPTY_ROAD: {
-        color = ROAD_COLOR;
-        padding = false;
+        e_road_t *road = (e_road_t *)entity;
+
+        render_entity(renderer, entity, ROAD_COLOR, false);
+
+        // if there is a direction on the road,
+        // draw an indicator of this direction
+        if (road->direction != DIR_COUNT) {
+          render_dir_indicator(renderer, road->pos.x, road->pos.y,
+                               road->direction, false);
+        }
         break;
       }
       case CAR: {
-        car_t *car = (car_t*)entity;
-        color = car->parked ? CAR_PARKED_COLOR : CAR_COLOR;
-        padding = true;
+        car_t *car = (car_t *)entity;
+        render_entity(renderer, entity,
+                      car->parked ? CAR_PARKED_COLOR : CAR_COLOR, true);
         break;
       }
       default: {
-        color = UNKNOWN_COLOR;
+        render_entity(renderer, entity, UNKNOWN_COLOR, true);
         break;
       }
     }
+  }
 
-    if (entity->c_override) {
-      color = entity->color;
+  // render road borders
+
+  for (int i = 0; i < data->roads->size; i++) {
+    road_t *road = data->roads->roads[i];
+
+    for (int j = 0; j < road->part_count; j++) {
+      e_road_t *e = road->parts[j];
+
+      SDL_SetRenderDrawColor(renderer, RGBA(ROAD_EDGE_COLOR));
+
+      SDL_Rect rect = {.x = e->pos.x * CELL_SIZE,
+                       .y = e->pos.y * CELL_SIZE,
+                       .w = CELL_SIZE,
+                       .h = CELL_SIZE};
+
+      SDL_RenderDrawRect(renderer, &rect);
+    }
+  }
+
+  // render intersection borders
+  // and wait spots
+
+  for (int i = 0; i < data->intersections->size; i++) {
+    inter_t *inter = data->intersections->data[i];
+
+    for (int j = 0; j < inter->part_count; j++) {
+      e_road_t *e = inter->parts[j];
+
+      SDL_SetRenderDrawColor(renderer, RGBA(INTERSECTION_EDGE_COLOR));
+
+      SDL_Rect rect = {.x = e->pos.x * CELL_SIZE,
+                       .y = e->pos.y * CELL_SIZE,
+                       .w = CELL_SIZE,
+                       .h = CELL_SIZE};
+
+      SDL_RenderDrawRect(renderer, &rect);
     }
 
-    SDL_SetRenderDrawColor(renderer, RGBA(color));
+    for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      e_road_t *e = inter->wait_spots[dir];
 
-    SDL_Rect rect = {.x = entity->pos.x * CELL_SIZE,
-                     .y = entity->pos.y * CELL_SIZE,
-                     .w = CELL_SIZE,
-                     .h = CELL_SIZE};
+      if (e == NULL) {
+        continue;
+      }
 
-    if (padding) {
-      rect.x = rect.x + PADDING / 2;
-      rect.y = rect.y + PADDING / 2;
-      rect.w = rect.w - PADDING;
-      rect.h = rect.h - PADDING;
+      SDL_SetRenderDrawColor(renderer, RGBA(INTERSECTION_EDGE_COLOR));
+
+      SDL_Rect rect = {.x = e->pos.x * CELL_SIZE,
+                       .y = e->pos.y * CELL_SIZE,
+                       .w = CELL_SIZE,
+                       .h = CELL_SIZE};
+
+      SDL_RenderDrawRect(renderer, &rect);
     }
-
-    SDL_RenderFillRect(renderer, &rect);
   }
 
   SDL_RenderPresent(renderer);

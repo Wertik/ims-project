@@ -5,12 +5,14 @@
 #include <stdbool.h>
 
 typedef enum {
-  IDX_UP = 0,
-  IDX_DOWN,
-  IDX_RIGHT,
-  IDX_LEFT,
-  IDX_COUNT,
-} dir_index_e;
+  DIR_UP = 0,
+  DIR_DOWN,
+  DIR_RIGHT,
+  DIR_LEFT,
+  // serves to indicate the count of directions
+  // as well as an invalid/unser direction
+  DIR_COUNT,
+} direction_e;
 
 // coordinate type, unsigned
 typedef unsigned int cord_t;
@@ -28,7 +30,7 @@ cord_t bounds(cord_t a, cord_t min, cord_t max);
 
 bool cmp_pos(position_t a, position_t b);
 
-position_t add_dir(position_t pos, dir_index_e direction);
-position_t set_dir(position_t pos, dir_index_e direction);
+position_t add_dir(position_t pos, direction_e direction);
+position_t set_dir(position_t pos, direction_e direction);
 
 void print_pos(position_t pos);
