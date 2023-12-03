@@ -15,6 +15,8 @@ typedef struct {
 typedef enum {
     SINGLE_INTER = 0,
     ROAD_DIR,
+    MULTI_ROAD,
+    MULTI_INTER,
 } map_e;
 
 void build_map(simulation_data_t *data);

@@ -172,31 +172,45 @@ void run_car(simulation_data_t *data, car_t *car) {
   // we're supposed to choose a path
   // go through the directions, pick randomly (even distr for now)
   if (path_option_count > 1) {
-    direction_e last = DIR_COUNT;
+    // should be current piece of road
+    entity_t *curr_e = get_entity(data->entities, car->pos);
 
-    for (int i = 0; i < path_option_count; i++) {
-      direction_e option = path_options[i];
-
-      if (option == DIR_COUNT) {
-        continue;
-      }
-
-      // don't take the same path back
-      if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
-        continue;
-      }
-
-      last = option;
-
-      if ((rand() % path_option_count) > 1) {
-        chosen_dir = option;
-        break;
-      }
+    if (curr_e->type != EMPTY_ROAD) {
+      printf("run_car: car not on a road\n");
+      exit(EXIT_FAILURE);
     }
 
-    // failed to choose, use the last possible option
-    if (chosen_dir == DIR_COUNT) {
-      chosen_dir = last;
+    e_road_t *curr_road = (e_road_t *)curr_e;
+
+    if (curr_road->direction == DIR_COUNT) {
+      direction_e last = DIR_COUNT;
+
+      for (int i = 0; i < path_option_count; i++) {
+        direction_e option = path_options[i];
+
+        if (option == DIR_COUNT) {
+          continue;
+        }
+
+        // don't take the same path back
+        if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
+          continue;
+        }
+
+        last = option;
+
+        if ((rand() % path_option_count) > 1) {
+          chosen_dir = option;
+          break;
+        }
+      }
+
+      // failed to choose, use the last possible option
+      if (chosen_dir == DIR_COUNT) {
+        chosen_dir = last;
+      }
+    } else {
+        chosen_dir = curr_road->direction;
     }
   } else {
     // use the only path option

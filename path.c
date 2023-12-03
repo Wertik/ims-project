@@ -63,6 +63,8 @@ int main() {
         quit = true;
         continue;
       }
+    } else {
+      draw(renderer, &data);
     }
   }
 

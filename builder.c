@@ -43,9 +43,44 @@ void build_intersection(simulation_data_t *data, position_t parts[],
 }
 
 void build_map(simulation_data_t *data) {
-  map_e map = SINGLE_INTER;
+  map_e map = MULTI_ROAD;
 
   switch (map) {
+    case MULTI_ROAD:
+      // road with 2 lanes
+
+      // -- build roads
+
+      build_road(data,
+                 (position_t[]){{9, 9},
+                                {10, 9},
+                                {11, 9},
+                                {12, 9},
+                                {13, 9},
+                                {14, 9},
+                                {15, 9},
+                                {16, 9}},
+                 8, DIR_LEFT);
+      build_road(data,
+                 (position_t[]){
+                     {9, 10}, {10, 10}, {11, 10}, {12, 10}, {13, 10}, {14, 10}},
+                 6, DIR_RIGHT);
+      build_road(data, (position_t[]){{16, 10}, {16, 11}, {16, 12}, {16, 13}},
+                 4, DIR_UP);
+      build_road(data, (position_t[]){{15, 10}, {15, 11}, {15, 12}, {15, 13}},
+                 4, DIR_DOWN);
+
+      // -- add parking spots
+
+      create_entities(data->entities, (position_t[]){{8, 9}, {15, 14}}, 2,
+                      creator_parking);
+
+      // -- add cars
+
+      create_entities(data->entities,
+                      (position_t[]){{9, 10}, {16, 13}}, 2,
+                      creator_car);
+      break;
     case SINGLE_INTER:
       // multiple cars meet on a single intersection
 
