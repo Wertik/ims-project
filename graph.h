@@ -39,7 +39,7 @@
 #define ROAD_INDICATOR_HEIGHT 4
 
 #define INDICATOR_COLOR \
-  (SDL_Color) { 0, 255, 0, 255 }
+  (SDL_Color) { 0, 0, 0, 255 }
 
 #define CAR_COLOR \
   (SDL_Color) { 255, 0, 0, 255 }

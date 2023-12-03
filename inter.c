@@ -33,9 +33,11 @@ inter_t *create_inter() {
 
   inter->part_count = 0;
   inter->parts = NULL;
+  inter->wait_count = 0;
 
   for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
     inter->wait_spots[dir] = NULL;
+    inter->wait_cars[dir] = NULL;
   }
 
   return inter;
@@ -94,4 +96,29 @@ inter_t *get_inter_wait(inter_list_t *list, position_t pos) {
     }
   }
   return NULL;
+}
+
+direction_e get_inter_wait_dir(inter_t *inter, position_t pos) {
+  for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
+    e_road_t *spot = inter->wait_spots[dir];
+
+    if (spot == NULL) {
+      continue;
+    }
+
+    if (spot->pos.x == pos.x && spot->pos.y == pos.y) {
+      return dir;
+    }
+  }
+  return DIR_COUNT;
+}
+
+void add_car_wait_spot(inter_t *inter, direction_e dir, car_t *car) {
+  inter->wait_cars[dir] = car;
+  inter->wait_count += 1;
+}
+
+void rem_car_wait_spot(inter_t *inter, direction_e dir) {
+  inter->wait_cars[dir] = NULL;
+  inter->wait_count -= 1;
 }

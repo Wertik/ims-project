@@ -31,5 +31,5 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS)
+	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) sdl.o
 

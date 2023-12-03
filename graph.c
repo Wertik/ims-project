@@ -59,7 +59,7 @@ void render_dir_indicator(SDL_Renderer *renderer, cord_t pos_x, cord_t pos_y,
 
   SDL_Rect rect = {x, y, w, h};
 
-  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255 /* RGBA(INDICATOR_COLOR) */);
+  SDL_SetRenderDrawColor(renderer, RGBA(INDICATOR_COLOR));
   SDL_RenderFillRect(renderer, &rect);
 }
 

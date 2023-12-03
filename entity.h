@@ -37,6 +37,10 @@ typedef struct {
   position_t speed;
   // parked?
   bool parked;
+  // waiting on intersection?
+  bool waiting;
+  // no path options?
+  bool blocked;
 } car_t;
 
 typedef struct {

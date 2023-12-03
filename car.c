@@ -1,5 +1,69 @@
 #include "car.h"
 
+void run_inters(simulation_data_t *data) {
+  inter_list_t *inters = data->intersections;
+
+  for (int i = 0; i < inters->size; i++) {
+    inter_t *inter = inters->data[i];
+
+    run_inter(data, inter);
+  }
+}
+
+// intersection simulation logic
+// if there are cars waiting on the intersection, signal one of them to proceed
+void run_inter(simulation_data_t *data, inter_t *inter) {
+  // ignore unused
+  data = data;
+
+  if (inter->wait_count == 0) {
+    return;
+  }
+
+  // single car, allow to go
+  if (inter->wait_count == 1) {
+    for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      car_t *car = inter->wait_cars[dir];
+
+      if (car == NULL) {
+        continue;
+      }
+
+      car->waiting = false;
+      rem_car_wait_spot(inter, dir);
+      break;
+    }
+    return;
+  }
+
+  // multiple cars
+
+  direction_e dir = DIR_UP;
+
+  while (true) {
+    direction_e curr_dir = dir;
+
+    dir += 1;
+    if (dir >= DIR_COUNT) {
+      dir = DIR_UP;
+    }
+
+    car_t *car = inter->wait_cars[curr_dir];
+
+    if (car == NULL) {
+      continue;
+    }
+
+    // choose who goes randomly
+    if ((rand() % (inter->wait_count + 1)) > 1) {
+      car->waiting = false;
+      rem_car_wait_spot(inter, curr_dir);
+      printf("picked direction %d to go\n", curr_dir);
+      break;
+    }
+  }
+}
+
 bool run_cars(simulation_data_t *data) {
   bool cars_parked = true;
 
@@ -30,7 +94,7 @@ bool run_cars(simulation_data_t *data) {
       run_car(data, car);
 
       // apply speed to the current position of the car
-      move_car(data->entities, car);
+      move_car(data, car);
     }
   }
 
@@ -38,13 +102,16 @@ bool run_cars(simulation_data_t *data) {
 }
 
 void run_car(simulation_data_t *data, car_t *car) {
+  // waiting on intersection, don't move
+  if (car->waiting) {
+    car->speed = (position_t){.x = 0, .y = 0};
+    return;
+  }
+
   // "path finding"
 
   // if there is a parking lot on the side of the road, head into it
   entity_t **around = get_surroundings(data->entities, car->pos);
-
-  // otherwise if we are on an intersection, choose a path
-  bool intersection = false;
 
   // path options to choose randomly from
   direction_e path_options[DIR_COUNT] = {DIR_COUNT};
@@ -93,79 +160,93 @@ void run_car(simulation_data_t *data, car_t *car) {
 
       printf("found a path option\n");
       print_pos(add_dir(car->pos, dir));
-
-      // more than one, we're on an intersection
-      if (path_option_count > 1) {
-        intersection = true;
-        printf("found an intersection\n");
-      }
       continue;
     }
   }
 
-  free(around);
-  around = NULL;
-
-  // we're supposed to choose a path on the intersection
-  // go through the directions, pick randomly (even distr for now)
   if (found_parking) {
     car->speed = set_dir(car->speed, chosen_dir);
-  } else {
-    if (intersection) {
-      direction_e last = DIR_COUNT;
+    return;
+  }
 
-      for (int i = 0; i < path_option_count; i++) {
-        direction_e option = path_options[i];
+  // we're supposed to choose a path
+  // go through the directions, pick randomly (even distr for now)
+  if (path_option_count > 1) {
+    direction_e last = DIR_COUNT;
 
-        if (option == DIR_COUNT) {
-          continue;
-        }
+    for (int i = 0; i < path_option_count; i++) {
+      direction_e option = path_options[i];
 
-        // don't take the same path back
-        if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
-          continue;
-        }
-
-        last = option;
-
-        if ((rand() % path_option_count) > 1) {
-          chosen_dir = option;
-          break;
-        }
+      if (option == DIR_COUNT) {
+        continue;
       }
 
-      // failed to choose, use the last possible option
-      if (chosen_dir == DIR_COUNT) {
-        chosen_dir = last;
+      // don't take the same path back
+      if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
+        continue;
       }
-    } else {
-      // use the only path option
-      for (int j = 0; j < path_option_count; j++) {
-        direction_e option = path_options[j];
 
-        if (option != DIR_COUNT) {
-          chosen_dir = option;
-          break;
-        }
+      last = option;
+
+      if ((rand() % path_option_count) > 1) {
+        chosen_dir = option;
+        break;
       }
     }
 
+    // failed to choose, use the last possible option
     if (chosen_dir == DIR_COUNT) {
-      print_car(car, false);
-      printf("failed to choose direction\n");
-      car->speed = (position_t){0, 0};
-    } else {
-      print_car(car, false);
-      printf("chose path to ");
-      print_pos(add_dir(car->pos, chosen_dir));
+      chosen_dir = last;
+    }
+  } else {
+    // use the only path option
+    for (int j = 0; j < path_option_count; j++) {
+      direction_e option = path_options[j];
 
-      car->speed = set_dir(car->speed, chosen_dir);
+      if (option != DIR_COUNT) {
+        chosen_dir = option;
+        break;
+      }
     }
   }
+
+  if (chosen_dir == DIR_COUNT) {
+    print_car(car, false);
+    printf("failed to choose direction\n");
+    car->speed = (position_t){0, 0};
+
+    free(around);
+    return;
+  }
+
+  print_car(car, false);
+  printf("chose path to ");
+  print_pos(add_dir(car->pos, chosen_dir));
+
+  car->speed = set_dir(car->speed, chosen_dir);
+
+  // -- moving to an intersection wait point
+
+  e_road_t *road = (e_road_t *)around[chosen_dir];
+
+  // if the road is an waiting point for intersection
+  inter_t *inter = get_inter_wait(data->intersections, road->pos);
+
+  if (inter != NULL) {
+    // add the car to waiting cars on the intersection
+    direction_e inter_dir = get_inter_wait_dir(inter, road->pos);
+
+    car->waiting = true;
+
+    add_car_wait_spot(inter, inter_dir, car);
+    printf("waiting on intersection\n");
+  }
+
+  free(around);
 }
 
 // move the car according to it's speed
-void move_car(entity_list_t *list, car_t *car) {
+void move_car(simulation_data_t *data, car_t *car) {
   // act on speed, update the car position
 
   cord_t new_x = bounds(car->pos.x + car->speed.x, 0, GRID_WIDTH - 1);
@@ -177,7 +258,7 @@ void move_car(entity_list_t *list, car_t *car) {
 
   // car can only move to it's destinated cell, if there is an empty road
 
-  entity_t *dst = get_entity(list, (position_t){new_x, new_y});
+  entity_t *dst = get_entity(data->entities, (position_t){new_x, new_y});
 
   // nothing there, cannot move to void
   if (dst == NULL) {

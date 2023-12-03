@@ -7,7 +7,10 @@
 #include "graph.h"
 #include "simulation.h"
 
-bool run(simulation_data_t *data) { return run_cars(data); }
+bool run(simulation_data_t *data) {
+  run_inters(data);
+  return run_cars(data);
+}
 
 int main() {
   SDL_Window *window = NULL;

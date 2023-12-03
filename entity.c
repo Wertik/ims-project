@@ -129,7 +129,11 @@ car_t *create_car(position_t pos) {
   car->type = CAR;
   car->pos = pos;
   car->p_pos = pos;
+
   car->parked = false;
+  car->waiting = false;
+  car->blocked = false;
+
   car->speed = (position_t){.x = 0, .y = 0};
   car->c_override = false;
 
@@ -140,11 +144,13 @@ void free_car(car_t *car) { free(car); }
 
 void print_car(car_t *car, bool nl) {
   if (nl) {
-    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s\n", car->pos.x, car->pos.y,
-           car->speed.x, car->speed.y, car->parked ? "yes" : "no");
+    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s\n", car->pos.x,
+           car->pos.y, car->speed.x, car->speed.y, car->parked ? "yes" : "no",
+           car->waiting ? "yes" : "no");
   } else {
-    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s: ", car->pos.x, car->pos.y,
-           car->speed.x, car->speed.y, car->parked ? "yes" : "no");
+    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s: ", car->pos.x,
+           car->pos.y, car->speed.x, car->speed.y, car->parked ? "yes" : "no",
+           car->waiting ? "yes" : "no");
   }
 }
 
@@ -164,7 +170,7 @@ void create_entities(entity_list_t *list, position_t positions[], int count,
 entity_t *creator_road(position_t pos) {
   e_road_t *road = create_road_entity(pos);
   road->direction = DIR_COUNT;
-  return (entity_t*)road;
+  return (entity_t *)road;
 }
 
 entity_t *creator_parking(position_t pos) {
@@ -175,9 +181,5 @@ entity_t *creator_parking(position_t pos) {
 
 entity_t *creator_car(position_t pos) {
   car_t *car = create_car(pos);
-
-  // set the car moving 1m right per tick
-  car->speed = (position_t){.x = 1, .y = 0};
-
   return (entity_t *)car;
 }
