@@ -1,18 +1,49 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "builder.h"
 #include "car.h"
 #include "graph.h"
 #include "simulation.h"
 
+extern char *optarg;
+extern int optind, opterr, optopt;
+
 bool run(simulation_data_t *data) {
   run_inters(data);
   return run_cars(data);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+  // -- parse arguments
+
+  int opt;
+
+  bool start_paused = false;
+
+  while ((opt = getopt(argc, argv, "ph")) != -1) {
+    switch (opt) {
+      case 'h':
+        printf(
+            "Usage: ./path [-h] [-p]\n\n-h get help\n-p start the simulation "
+            "paused\n");
+        return EXIT_SUCCESS;
+      case 'p':
+        start_paused = true;
+        break;
+      case ':':
+        printf("option needs a value\n");
+        break;
+      case '?':
+        printf("unknown option : %c\n", optopt);
+        break;
+    }
+  }
+
   SDL_Window *window = NULL;
   SDL_Renderer *renderer = NULL;
 
@@ -32,7 +63,7 @@ int main() {
 
   int tick = 0;
 
-  bool do_run = true;
+  bool do_run = !start_paused;
 
   SDL_Event e;
   while (!quit) {
