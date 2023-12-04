@@ -88,6 +88,10 @@ int main(int argc, char *argv[]) {
         do_run = !do_run;
       }
     }
+    
+    if (map == 2 && tick % 4 == 0 && tick < 100){
+      generate_cars(&data);
+    }
 
     if (do_run) {
       printf("--- Tick #%d\n", tick++);
@@ -96,7 +100,11 @@ int main(int argc, char *argv[]) {
       draw(renderer, &data);
 
       // Zpoždění pro lepší pozorování
-      SDL_Delay(400);
+      if (map == 2){
+        SDL_Delay(100);
+      } else {
+        SDL_Delay(400);
+      }
       printf("---\n");
 
       if (should_quit) {

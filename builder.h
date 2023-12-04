@@ -36,3 +36,5 @@ typedef enum {
 } map_e;
 
 void build_map(simulation_data_t *data, map_e map);
+
+void generate_cars(simulation_data_t *data);

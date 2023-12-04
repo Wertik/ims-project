@@ -199,7 +199,7 @@ void run_car(simulation_data_t *data, car_t *car) {
 
         last = option;
 
-        if ((rand() % path_option_count) > 1) {
+        if ((rand() % (path_option_count + 1)) > 1) {
           chosen_dir = option;
           break;
         }
