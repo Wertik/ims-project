@@ -51,16 +51,17 @@ void build_map(simulation_data_t *data, map_e map) {
 
       // -- build roads
 
-      build_road(data,
-                 (position_t[]){{9, 9},
-                                {10, 9},
-                                {11, 9},
-                                {12, 9},
-                                {13, 9},
-                                {14, 9},
-                                {15, 9},
-                                {16, 9}},
-                 8, DIR_LEFT);
+      BUILD_ROAD(data,
+                 ARR({{9, 9},
+                      {10, 9},
+                      {11, 9},
+                      {12, 9},
+                      {13, 9},
+                      {14, 9},
+                      {15, 9},
+                      {16, 9}}),
+                 DIR_LEFT);
+                 
       build_road(data,
                  (position_t[]){
                      {9, 10}, {10, 10}, {11, 10}, {12, 10}, {13, 10}, {14, 10}},
