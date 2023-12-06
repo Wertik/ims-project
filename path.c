@@ -108,9 +108,9 @@ int main(int argc, char *argv[]) {
       }
       printf("---\n");
 
-      // run for at least 2 ticks
+      // run for at least 4 ticks
       // - wait for car generators
-      if (should_quit && tick >= 2) {
+      if (should_quit && tick >= 4) {
         printf("Stopping...\n");
         // Pauza pro zobrazení výsledků
         SDL_Delay(1000);
