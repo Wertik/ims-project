@@ -16,9 +16,14 @@ typedef struct {
   car_t *wait_cars[DIR_COUNT];
   int wait_count;
 
+  bool occupied;
+
   // queue places (aka cells where the car waits at the intersection)
   // [direction] -> [queue road cell]
   e_road_t *wait_spots[DIR_COUNT];
+
+  // options, aka where can I exit this intersection
+  e_road_t *options[DIR_COUNT];
 } inter_t;
 
 typedef struct {

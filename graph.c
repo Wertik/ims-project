@@ -171,14 +171,33 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
       SDL_RenderDrawRect(renderer, &rect);
     }
 
-    for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
+    // wait spots
+    for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
       e_road_t *e = inter->wait_spots[dir];
 
       if (e == NULL) {
         continue;
       }
 
-      SDL_SetRenderDrawColor(renderer, RGBA(INTERSECTION_EDGE_COLOR));
+      SDL_SetRenderDrawColor(renderer, RGBA(INTERSECTION_SPOT_EDGE_COLOR));
+
+      SDL_Rect rect = {.x = e->pos.x * CELL_SIZE,
+                       .y = e->pos.y * CELL_SIZE,
+                       .w = CELL_SIZE,
+                       .h = CELL_SIZE};
+
+      SDL_RenderDrawRect(renderer, &rect);
+    }
+
+    // exits
+    for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      e_road_t *e = inter->options[dir];
+
+      if (e == NULL) {
+        continue;
+      }
+
+      SDL_SetRenderDrawColor(renderer, RGBA(INTERSECTION_EXIT_EDGE_COLOR));
 
       SDL_Rect rect = {.x = e->pos.x * CELL_SIZE,
                        .y = e->pos.y * CELL_SIZE,

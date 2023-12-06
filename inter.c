@@ -34,10 +34,13 @@ inter_t *create_inter() {
   inter->part_count = 0;
   inter->parts = NULL;
   inter->wait_count = 0;
+  inter->occupied = false;
 
   for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
     inter->wait_spots[dir] = NULL;
     inter->wait_cars[dir] = NULL;
+
+    inter->options[dir] = NULL;
   }
 
   return inter;
@@ -68,7 +71,7 @@ inter_t *get_inter(inter_list_t *list, position_t pos) {
     inter_t *inter = list->data[i];
 
     for (int j = 0; j < inter->part_count; j++) {
-      e_road_t *part = inter->parts[i];
+      e_road_t *part = inter->parts[j];
 
       if (part->pos.x == pos.x && part->pos.y == pos.y) {
         return inter;

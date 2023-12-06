@@ -21,7 +21,8 @@ void build_road(simulation_data_t *data, position_t positions[], int count,
 
 void build_intersection(simulation_data_t *data, position_t parts[],
                         int part_count, inter_spot_data_t wait_spots[],
-                        int wait_count) {
+                        int wait_count, inter_spot_data_t options[],
+                        int option_count) {
   inter_t *inter = create_inter();
 
   for (int i = 0; i < part_count; i++) {
@@ -41,12 +42,18 @@ void build_intersection(simulation_data_t *data, position_t parts[],
     add_inter_wait_spot(inter, spot_data.dir, road_e);
   }
 
+  for (int i = 0; i < option_count; i++) {
+    e_road_t *road = (e_road_t *)get_entity(data->entities, options[i].pos);
+    inter->options[options[i].dir] = road;
+  }
+
   add_inter(data->intersections, inter);
 }
 
 void generate_cars(simulation_data_t *data) {
   position_t starting_positions[] = {{5, 3}, {18, 27}};
   int number_of_cars = 2;
+  
   for (int i = 0; i < number_of_cars; ++i) {
     create_entities(data->entities, (position_t[]){starting_positions[i]}, 1,
                     creator_car);
@@ -57,10 +64,37 @@ void build_map(simulation_data_t *data, map_e map) {
   printf("Building map %d...\n", map);
 
   switch (map) {
+    case MULTI_INTER:
+      // intersection on a 2 lane road
+
+      // -- build roads
+
+      BUILD_ROAD(data, ARR({{9, 9}, {10, 9}, {11, 9}, {12, 9}}), DIR_LEFT);
+
+      BUILD_ROAD(data, ARR({{9, 9}, {10, 9}, {11, 9}, {12, 9}}), DIR_LEFT);
+
+      BUILD_ROAD(data, ARR({{9, 10}, {10, 10}, {11, 10}, {12, 10}}), DIR_RIGHT);
+      BUILD_ROAD(data, ARR({{14, 11}, {14, 12}, {14, 13}, {14, 14}}), DIR_UP);
+      BUILD_ROAD(data, ARR({{13, 11}, {13, 12}, {13, 13}, {13, 14}}), DIR_DOWN);
+
+      // -- build intersections
+
+      BUILD_INTER(data, ARR({{13, 10}, {14, 10}, {13, 9}, {14, 9}}),
+                  ARR({{.pos = {12, 10}, .dir = DIR_LEFT},
+                       {.pos = {14, 11}, .dir = DIR_DOWN}}),
+                  ARR({{.pos = {12, 9}, .dir = DIR_LEFT},
+                       {.pos = {13, 11}, .dir = DIR_DOWN}}));
+
+      // -- add parking spots
+
+      BUILD_PARKING(data, ARR({{8, 9}, {13, 15}}));
+
+      // -- add cars
+
+      ADD_CARS(data, ARR({{9, 10}, {14, 14}}));
+      break;
     case PARKING_LOT: {
       // cars starting position
-      position_t starting_positions[] = {{5, 3}, {18, 27}};
-      int number_of_cars = 2;
 
       position_t intersection_positions[] = {
           {18, 12}, {18, 14}, {18, 16}, {18, 18}, {18, 20}};
@@ -75,7 +109,7 @@ void build_map(simulation_data_t *data, map_e map) {
                 {.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
                 {.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN},
             },
-            2);
+            2, NULL, 0);
       }
 
       // -- build extended vertical roads for car entrances
@@ -163,14 +197,11 @@ void build_map(simulation_data_t *data, map_e map) {
 
       // -- build intersections
 
-      build_intersection(
-          data,
-          // parts
-          (position_t[]){{12, 10}}, 1,
-          // wait spots
-          (inter_spot_data_t[]){{.pos = {11, 10}, .dir = DIR_LEFT},
-                                {.pos = {12, 11}, .dir = DIR_DOWN}},
-          2);
+      BUILD_INTER(data, ARR({{12, 10}}),
+                  ARR({{{11, 10}, DIR_LEFT},
+                       {{12, 11}, DIR_DOWN},
+                       {{13, 10}, DIR_RIGHT}}),
+                  ARR({{{12, 9}, DIR_UP}}));
 
       // -- add parking spots
 

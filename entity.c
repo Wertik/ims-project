@@ -132,10 +132,13 @@ car_t *create_car(position_t pos) {
 
   car->parked = false;
   car->waiting = false;
-  car->blocked = false;
+  car->intersection = false;
 
   car->speed = (position_t){.x = 0, .y = 0};
   car->c_override = false;
+
+  car->nav = NULL;
+  car->nav_count = 0;
 
   return car;
 }
@@ -182,4 +185,48 @@ entity_t *creator_parking(position_t pos) {
 entity_t *creator_car(position_t pos) {
   car_t *car = create_car(pos);
   return (entity_t *)car;
+}
+
+void add_nav_steps(car_t *car, direction_e steps[], int count) {
+  int new_count = car->nav_count + count;
+
+  car->nav =
+      (direction_e *)realloc(car->nav, sizeof(direction_e) * (new_count));
+  MERROR(car->nav);
+
+  for (int i = car->nav_count; i < new_count; i++) {
+    car->nav[i] = steps[i - car->nav_count];
+  }
+
+  car->nav_count = new_count;
+}
+
+// pop a navigation step
+direction_e pop_nav_step(car_t *car) {
+  if (car->nav == NULL) {
+    return DIR_COUNT;
+  }
+
+  direction_e res = car->nav[0];
+
+  if (car->nav_count == 1) {
+    // last element
+    free(car->nav);
+    car->nav = NULL;
+    car->nav_count = 0;
+    return res;
+  }
+
+  // shift all steps left by one
+  for (int i = 0; i + 1 < car->nav_count; i++) {
+    car->nav[i] = car->nav[i + 1];
+  }
+
+  // shrink by one
+  car->nav = (direction_e *)realloc(
+      car->nav, sizeof(direction_e *) * (car->nav_count - 1));
+  MERROR(car->nav);
+
+  car->nav_count -= 1;
+  return res;
 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
+
+#include "util.h"
 
 typedef enum {
   DIR_UP = 0,
@@ -36,3 +38,5 @@ position_t set_dir(position_t pos, direction_e direction);
 direction_e inverse_dir(direction_e dir);
 
 void print_pos(position_t pos);
+
+direction_e *get_nav(position_t from, position_t to, bool y_prio, int *count);

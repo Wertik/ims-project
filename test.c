@@ -59,6 +59,49 @@ int main() {
     free_road(road);
   }
 
+  {
+    car_t *car = create_car((position_t){0, 0});
+
+    add_nav_steps(car, (direction_e[]){DIR_UP, DIR_DOWN}, 2);
+    ASSERT_EQ(car->nav_count, 2);
+
+    direction_e first = pop_nav_step(car);
+    ASSERT_EQ(first, DIR_UP);
+    ASSERT_EQ(car->nav_count, 1);
+
+    direction_e second = pop_nav_step(car);
+    ASSERT_EQ(second, DIR_DOWN);
+    ASSERT_EQ(car->nav_count, 0);
+    ASSERT_EQ(car->nav, NULL);
+  }
+
+  {
+    int nav_count = 0;
+    direction_e *nav = get_nav((position_t){0, 0}, (position_t){1, 2}, false, &nav_count);
+
+    ASSERT_NEQ(nav, NULL);
+    ASSERT_EQ(nav_count, 3);
+
+    ASSERT_EQ(nav[0], DIR_RIGHT);
+
+    ASSERT_EQ(nav[1], DIR_DOWN);
+    ASSERT_EQ(nav[2], DIR_DOWN);
+  }
+
+  {
+    int nav_count = 0;
+    direction_e *nav = get_nav((position_t){2, 2}, (position_t){0, 0}, true, &nav_count);
+
+    ASSERT_NEQ(nav, NULL);
+    ASSERT_EQ(nav_count, 4);
+
+    ASSERT_EQ(nav[0], DIR_LEFT);
+    ASSERT_EQ(nav[1], DIR_LEFT);
+
+    ASSERT_EQ(nav[2], DIR_UP);
+    ASSERT_EQ(nav[3], DIR_UP);
+  }
+
   printf("Tests ran successfully.\n");
   return EXIT_SUCCESS;
 }

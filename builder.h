@@ -15,6 +15,36 @@
     build_road(data, positions, count, DIR);            \
   } while (0);
 
+#define BUILD_INTER(DATA, POSITIONS, WAIT_SPOTS, OPTIONS)                   \
+  do {                                                                      \
+    position_t positions[] = POSITIONS;                                     \
+    inter_spot_data_t wait_spots[] = WAIT_SPOTS;                            \
+    inter_spot_data_t options[] = OPTIONS;                                  \
+                                                                            \
+    int count = sizeof(positions) / sizeof(position_t);                     \
+    int wait_spot_count = sizeof(wait_spots) / sizeof(inter_spot_data_t);   \
+    int option_count = sizeof(options) / sizeof(inter_spot_data_t);         \
+                                                                            \
+    build_intersection(data, positions, count, wait_spots, wait_spot_count, \
+                       options, option_count);                              \
+  } while (0);
+
+#define BUILD_PARKING(DATA, POSITIONS)                                  \
+  do {                                                                  \
+    position_t positions[] = POSITIONS;                                 \
+    int count = sizeof(positions) / sizeof(position_t);                 \
+                                                                        \
+    create_entities(data->entities, positions, count, creator_parking); \
+  } while (0);
+
+#define ADD_CARS(DATA, POSITIONS)                                   \
+  do {                                                              \
+    position_t positions[] = POSITIONS;                             \
+    int count = sizeof(positions) / sizeof(position_t);             \
+                                                                    \
+    create_entities(data->entities, positions, count, creator_car); \
+  } while (0);
+
 // To pass an array literal as an argument for macros
 // https://stackoverflow.com/a/5504336/20205862
 #define ARR(...) __VA_ARGS__

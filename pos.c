@@ -12,6 +12,49 @@ bool cmp_pos(position_t a, position_t b) { return a.x == b.x && a.y == b.y; }
 
 void print_pos(position_t pos) { printf("[%d;%d]\n", pos.x, pos.y); }
 
+direction_e *get_nav_x(int delta_x, direction_e *res, int *count) {
+  for (int x = 0; x < abs(delta_x); x += 1) {
+    *count = *count + 1;
+    res = (direction_e *)realloc(res, sizeof(direction_e) * (*count));
+    MERROR(res);
+
+    res[(*count) - 1] = delta_x > 0 ? DIR_RIGHT : DIR_LEFT;
+  }
+  return res;
+}
+
+direction_e *get_nav_y(int delta_y, direction_e *res, int *count) {
+  for (int y = 0; y < abs(delta_y); y += 1) {
+    *count = *count + 1;
+    res = (direction_e *)realloc(res, sizeof(direction_e) * (*count));
+    MERROR(res);
+
+    res[(*count) - 1] = delta_y > 0 ? DIR_DOWN : DIR_UP;
+  }
+  return res;
+}
+
+direction_e *get_nav(position_t from, position_t to, bool y_prio, int *count) {
+  int delta_x = to.x - from.x;
+  int delta_y = to.y - from.y;
+
+  direction_e *res = NULL;
+  *count = 0;
+
+  // negative - left, up
+  // positive - right, down
+
+  if (y_prio) {
+    res = get_nav_y(delta_y, res, count);
+    res = get_nav_x(delta_x, res, count);
+  } else {
+    res = get_nav_x(delta_x, res, count);
+    res = get_nav_y(delta_y, res, count);
+  }
+
+  return res;
+}
+
 direction_e inverse_dir(direction_e dir) {
   // direction enum not done properly, have to use a switch here
   switch (dir) {

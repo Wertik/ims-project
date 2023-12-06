@@ -39,8 +39,12 @@ typedef struct {
   bool parked;
   // waiting on intersection?
   bool waiting;
-  // no path options?
-  bool blocked;
+  // going through an intersection?
+  bool intersection;
+
+  // navigation steps
+  direction_e *nav;
+  int nav_count;
 } car_t;
 
 typedef struct {
@@ -89,3 +93,7 @@ void create_entities(entity_list_t *list, position_t positions[], int count,
 entity_t *creator_road(position_t pos);
 entity_t *creator_parking(position_t pos);
 entity_t *creator_car(position_t pos);
+
+void add_nav_steps(car_t *car, direction_e steps[], int count);
+// pop a navigation step
+direction_e pop_nav_step(car_t *car);

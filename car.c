@@ -16,7 +16,7 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
   // ignore unused
   data = data;
 
-  if (inter->wait_count == 0) {
+  if (inter->wait_count == 0 || inter->occupied) {
     return;
   }
 
@@ -30,6 +30,7 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
       }
 
       car->waiting = false;
+      inter->occupied = true;
       rem_car_wait_spot(inter, dir);
       break;
     }
@@ -57,6 +58,7 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
     // choose who goes randomly
     if ((rand() % (inter->wait_count + 1)) > 1) {
       car->waiting = false;
+      inter->occupied = true;
       rem_car_wait_spot(inter, curr_dir);
       printf("picked direction %d to go\n", curr_dir);
       break;
@@ -105,6 +107,26 @@ void run_car(simulation_data_t *data, car_t *car) {
   // waiting on intersection, don't move
   if (car->waiting) {
     car->speed = (position_t){.x = 0, .y = 0};
+    return;
+  }
+
+  // car has specific directions to take
+  // move by those
+  if (car->nav_count != 0) {
+    // direction before leaving the intersection, un-occupy the intersection
+    if (car->nav_count == 1) {
+      inter_t *inter = get_inter(data->intersections, car->pos);
+
+      if (inter != NULL) {
+        printf("set intersection to un-occupied\n");
+        inter->occupied = false;
+      }
+    }
+
+    direction_e dir = pop_nav_step(car);
+    car->speed = set_dir(car->speed, dir);
+    print_car(car, false);
+    printf("following steps\n");
     return;
   }
 
@@ -160,8 +182,8 @@ void run_car(simulation_data_t *data, car_t *car) {
 
       printf("found a path option\n");
       print_pos(add_dir(car->pos, dir));
-      continue;
     }
+    continue;
   }
 
   if (found_parking) {
@@ -210,7 +232,7 @@ void run_car(simulation_data_t *data, car_t *car) {
         chosen_dir = last;
       }
     } else {
-        chosen_dir = curr_road->direction;
+      chosen_dir = curr_road->direction;
     }
   } else {
     // use the only path option
@@ -253,9 +275,76 @@ void run_car(simulation_data_t *data, car_t *car) {
     car->waiting = true;
 
     add_car_wait_spot(inter, inter_dir, car);
-    printf("waiting on intersection\n");
-  }
+    printf("waiting on intersection, coming from %d\n", inter_dir);
 
+    // count options for change bound
+    int count = 0;
+    for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      e_road_t *opt = inter->options[dir];
+
+      if (opt != NULL) {
+        count++;
+      }
+    }
+
+    if (count == 0) {
+      printf("no intersection exit to chose from\n");
+      exit(EXIT_FAILURE);
+    }
+
+    direction_e dir = DIR_UP;
+
+    // decide where we're going on the intersection
+    while (true) {
+      direction_e curr_dir = dir;
+
+      if ((++dir) >= DIR_COUNT) {
+        dir = DIR_UP;
+      }
+
+      if (inter_dir == curr_dir) {
+        continue;
+      }
+
+      e_road_t *opt = inter->options[curr_dir];
+
+      if (opt == NULL) {
+        continue;
+      }
+
+      // chance to pick this road
+
+      if ((rand() % (count + 1)) >= 1) {
+        int nav_count = 0;
+        direction_e *nav =
+            get_nav(road->pos, opt->pos,
+                    inter_dir == DIR_DOWN || inter_dir == DIR_UP, &nav_count);
+
+        printf("navigate from ");
+        print_pos(road->pos);
+        printf(" to ");
+        print_pos(opt->pos);
+
+        if (nav == NULL) {
+          printf("run_car: invalid navigation through intersection.\n");
+          exit(EXIT_FAILURE);
+        }
+
+        // add steps based on the direction
+        add_nav_steps(car, nav, nav_count);
+
+        printf("got navigation steps\n");
+
+        // print steps
+        for (int i = 0; i < nav_count; i++) {
+          printf("- %d\n", nav[i]);
+        }
+
+        free(nav);
+        break;
+      }
+    }
+  }
   free(around);
 }
 
