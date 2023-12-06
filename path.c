@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
       draw(renderer, &data);
 
       // Zpoždění pro lepší pozorování
-      if (map == 2) {
+      if (map == PARKING_LOT) {
         SDL_Delay(100);
       } else {
         SDL_Delay(400);

@@ -60,9 +60,9 @@ typedef struct {
 typedef enum {
   SINGLE_INTER = 0,
   ROAD_DIR,
-  MULTI_ROAD,
   MULTI_INTER,
   PARKING_LOT,
+  
   MAP_COUNT,
 } map_e;
 
