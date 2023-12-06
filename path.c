@@ -31,7 +31,8 @@ int main(int argc, char *argv[]) {
     switch (opt) {
       case 'h':
         printf(
-            "Usage: ./path [-h] [-p] [-m MAP]\n\n-h get help\n-p start the simulation "
+            "Usage: ./path [-h] [-p] [-m MAP]\n\n-h get help\n-p start the "
+            "simulation "
             "paused\n-m MAP id of map to use for the simulation (enum "
             "map_e)\n");
         return EXIT_SUCCESS;
@@ -88,26 +89,28 @@ int main(int argc, char *argv[]) {
         do_run = !do_run;
       }
     }
-    
-    if (map == 2 && tick % 4 == 0 && tick < 100){
-      generate_cars(&data);
-    }
 
     if (do_run) {
       printf("--- Tick #%d\n", tick++);
+
+      if (map == PARKING_LOT && tick % 4 == 0 && tick <= 12) {
+        generate_cars(&data);
+      }
 
       bool should_quit = !run(&data);
       draw(renderer, &data);
 
       // Zpoždění pro lepší pozorování
-      if (map == 2){
+      if (map == 2) {
         SDL_Delay(100);
       } else {
         SDL_Delay(400);
       }
       printf("---\n");
 
-      if (should_quit) {
+      // run for at least 2 ticks
+      // - wait for car generators
+      if (should_quit && tick >= 2) {
         printf("Stopping...\n");
         // Pauza pro zobrazení výsledků
         SDL_Delay(1000);
