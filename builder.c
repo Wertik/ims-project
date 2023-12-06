@@ -52,8 +52,8 @@ void build_intersection(simulation_data_t *data, position_t parts[],
 
 void generate_cars(simulation_data_t *data) {
   position_t starting_positions[] = {{5, 3}, {18, 27}};
-  int number_of_cars = 2;
-  
+  int number_of_cars = 1;
+
   for (int i = 0; i < number_of_cars; ++i) {
     create_entities(data->entities, (position_t[]){starting_positions[i]}, 1,
                     creator_car);
@@ -103,20 +103,21 @@ void build_map(simulation_data_t *data, map_e map) {
       for (int i = 0; i < num_intersections; i++) {
         position_t inter_pos = intersection_positions[i];
 
-        build_intersection(
-            data, (position_t[]){inter_pos}, 1,
-            (inter_spot_data_t[]){
-                {.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
-                {.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN},
-            },
-            2, NULL, 0);
+        BUILD_INTER(
+            data, ARR({inter_pos}),
+            ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}}),
+            ARR({{.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
+                 {.pos = {inter_pos.x - 1, inter_pos.y}, .dir = DIR_LEFT}}));
       }
+
+      BUILD_INTER(data, ARR({{5, 20}}), ARR({{{5, 19}, DIR_UP}}),
+                  ARR({{{6, 20}, DIR_RIGHT}, {{5, 21}, DIR_DOWN}}));
 
       // -- build extended vertical roads for car entrances
       position_t road_positions[] = {
-          {5, 3},  {5, 4},  {5, 5},  {5, 6},  {5, 7},  {5, 8},
-          {5, 9},  {5, 10}, {5, 11}, {5, 12}, {5, 13}, {5, 14},
-          {5, 15}, {5, 16}, {5, 17}, {5, 18}, {5, 19}, {5, 20}};
+          {5, 3},  {5, 4},  {5, 5},  {5, 6},  {5, 7},  {5, 8},  {5, 9},
+          {5, 10}, {5, 11}, {5, 12}, {5, 13}, {5, 14}, {5, 15}, {5, 16},
+          {5, 17}, {5, 18}, {5, 19}, {5, 21}, {5, 22}, {5, 23}};
 
       int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
 
@@ -169,10 +170,15 @@ void build_map(simulation_data_t *data, map_e map) {
         }
       }
 
+      // -- add map exit
+      entity_t *map_exit = create_entity((position_t){5, 24});
+      map_exit->type = MAP_EXIT;
+      add_entity(data->entities, map_exit);
+
       // -- adjust road direction for the ends of the vertical roads
-      e_road_t *bottom_left =
+      /* e_road_t *bottom_left =
           (e_road_t *)get_entity(data->entities, (position_t){5, 20});
-      bottom_left->direction = DIR_RIGHT;
+      bottom_left->direction = DIR_RIGHT; */
 
       e_road_t *top_right =
           (e_road_t *)get_entity(data->entities, (position_t){18, 10});

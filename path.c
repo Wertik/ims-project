@@ -64,7 +64,8 @@ int main(int argc, char *argv[]) {
 
   simulation_data_t data = {.roads = create_road_list(),
                             .entities = create_entity_list(),
-                            .intersections = create_inter_list()};
+                            .intersections = create_inter_list(),
+                            .tick = 0};
 
   build_map(&data, map);
 
@@ -73,8 +74,6 @@ int main(int argc, char *argv[]) {
   srand(time(NULL));
 
   bool quit = false;
-
-  int tick = 0;
 
   bool do_run = !start_paused;
 
@@ -91,9 +90,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (do_run) {
-      printf("--- Tick #%d\n", tick++);
+      printf("--- Tick #%d\n", data.tick++);
 
-      if (map == PARKING_LOT && tick % 4 == 0 && tick <= 12) {
+      if (map == PARKING_LOT && data.tick % 4 == 0 && data.tick <= 12) {
         generate_cars(&data);
       }
 
@@ -110,7 +109,7 @@ int main(int argc, char *argv[]) {
 
       // run for at least 4 ticks
       // - wait for car generators
-      if (should_quit && tick >= 4) {
+      if (should_quit && data.tick >= 4) {
         printf("Stopping...\n");
         // Pauza pro zobrazení výsledků
         SDL_Delay(1000);

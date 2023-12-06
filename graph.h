@@ -50,8 +50,14 @@
 #define CAR_PARKED_COLOR \
   (SDL_Color) { 0, 125, 125, 255 }
 
+#define CAR_LEAVING_COLOR \
+  (SDL_Color) { 0, 255, 125, 255 }
+
 #define UNKNOWN_COLOR \
   (SDL_Color) { 189, 189, 189, 255 }
+
+#define MAP_EXIT_COLOR \
+  (SDL_Color) { 100, 255, 100, 255 }
 
 void initialize_SDL(SDL_Window **window, SDL_Renderer **renderer);
 

@@ -77,7 +77,8 @@ int main() {
 
   {
     int nav_count = 0;
-    direction_e *nav = get_nav((position_t){0, 0}, (position_t){1, 2}, false, &nav_count);
+    direction_e *nav =
+        get_nav((position_t){0, 0}, (position_t){1, 2}, false, &nav_count);
 
     ASSERT_NEQ(nav, NULL);
     ASSERT_EQ(nav_count, 3);
@@ -90,7 +91,8 @@ int main() {
 
   {
     int nav_count = 0;
-    direction_e *nav = get_nav((position_t){2, 2}, (position_t){0, 0}, true, &nav_count);
+    direction_e *nav =
+        get_nav((position_t){2, 2}, (position_t){0, 0}, false, &nav_count);
 
     ASSERT_NEQ(nav, NULL);
     ASSERT_EQ(nav_count, 4);
@@ -100,6 +102,22 @@ int main() {
 
     ASSERT_EQ(nav[2], DIR_UP);
     ASSERT_EQ(nav[3], DIR_UP);
+  }
+
+  {
+    entity_list_t *list = create_entity_list();
+
+    car_t *car = create_car((position_t){0, 0});
+    car_t *car_2 = create_car((position_t){1, 1});
+
+    add_entity(list, (entity_t *)car);
+    add_entity(list, (entity_t *)car_2);
+
+    del_entity(list, (entity_t *)car);
+
+    ASSERT_EQ(list->size, 1);
+
+    free_entity_list(list);
   }
 
   printf("Tests ran successfully.\n");

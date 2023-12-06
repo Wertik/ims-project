@@ -11,6 +11,7 @@ typedef enum {
   EMPTY_ROAD,
   CAR,
   PARKING,
+  MAP_EXIT,
 } entity_type_e;
 
 typedef struct {
@@ -35,14 +36,28 @@ typedef struct {
   position_t p_pos;
   // speed per tick
   position_t speed;
+
   // parked?
   bool parked;
+  // at what tick the car parked
+  int parked_at;
+
   // waiting on intersection?
   bool waiting;
-  // going through an intersection?
-  bool intersection;
 
-  // navigation steps
+  // leaving the map, looking for an exit
+  bool leaving;
+
+  // car is finished with the simulation
+  bool left;
+
+  // navigation through the whole map
+  // aka what direction to take on intersections
+  direction_e *inter_nav;
+  int inter_nav_count;
+
+  // immediate navigation steps
+  // aka what directions to take right now
   direction_e *nav;
   int nav_count;
 } car_t;
@@ -68,6 +83,7 @@ typedef entity_t *(*creator_fn_t)(position_t pos);
 
 entity_list_t *create_entity_list();
 void add_entity(entity_list_t *list, entity_t *entity);
+void rem_entity(entity_list_t *list, entity_t *entity);
 
 entity_t *get_entity(entity_list_t *list, position_t pos);
 entity_t **get_surroundings(entity_list_t *list, position_t pos);

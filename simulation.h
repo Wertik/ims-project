@@ -17,8 +17,12 @@
 // real cell size
 #define CELL_SIZE 20
 
+// how many ticks a car should wait at the parking spot
+#define CAR_PARKED_TICKS 10
+
 typedef struct {
   road_list_t *roads;
   entity_list_t *entities;
   inter_list_t *intersections;
+  int tick;
 } simulation_data_t;

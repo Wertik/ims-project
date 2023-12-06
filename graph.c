@@ -122,8 +122,19 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
       }
       case CAR: {
         car_t *car = (car_t *)entity;
-        render_entity(renderer, entity,
-                      car->parked ? CAR_PARKED_COLOR : CAR_COLOR, true);
+
+        SDL_Color car_color = CAR_COLOR;
+        if (car->parked) {
+          car_color = CAR_PARKED_COLOR;
+        } else if (car->leaving) {
+          car_color = CAR_LEAVING_COLOR;
+        }
+
+        render_entity(renderer, entity, car_color, true);
+        break;
+      }
+      case MAP_EXIT: {
+        render_entity(renderer, entity, MAP_EXIT_COLOR, false);
         break;
       }
       default: {
@@ -189,7 +200,7 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
       SDL_RenderDrawRect(renderer, &rect);
     }
 
-    // exits
+    // intersection exits
     for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
       e_road_t *e = inter->options[dir];
 

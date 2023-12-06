@@ -67,7 +67,7 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
 }
 
 bool run_cars(simulation_data_t *data) {
-  bool cars_parked = true;
+  bool cars_left = true;
 
   entity_list_t *list = data->entities;
 
@@ -82,13 +82,13 @@ bool run_cars(simulation_data_t *data) {
       print_car(car, true);
 
       // no need to do anything when parked
-      if (car->parked) {
-        cars_parked &= cars_parked;
+      if (car->left) {
+        cars_left &= cars_left;
         continue;
       }
 
       // car simulation logic
-      cars_parked = false;
+      cars_left = false;
 
       // path finding logic
       // intersections, roads, etc.
@@ -100,10 +100,20 @@ bool run_cars(simulation_data_t *data) {
     }
   }
 
-  return !cars_parked;
+  return !cars_left;
 }
 
 void run_car(simulation_data_t *data, car_t *car) {
+  if (car->parked) {
+    // once we waited for long enough, head towards the exit
+    if (data->tick >= car->parked_at + CAR_PARKED_TICKS) {
+      car->leaving = true;
+      car->parked = false;
+      printf("leaving the parking lot.\n");
+    }
+    return;
+  }
+
   // waiting on intersection, don't move
   if (car->waiting) {
     car->speed = (position_t){.x = 0, .y = 0};
@@ -152,10 +162,21 @@ void run_car(simulation_data_t *data, car_t *car) {
 
     // head into a parking lot instantly, don't hesitate
     if (entity->type == PARKING) {
+      // if we're already leaving, we're not interested in parking spots
+      if (car->leaving) {
+        continue;
+      }
+
       print_car(car, false);
       printf("found a parking lot.\n");
       found_parking = true;
       chosen_dir = dir;
+      break;
+    }
+
+    if (entity->type == MAP_EXIT && car->leaving) {
+      chosen_dir = dir;
+      printf("found exit.\n");
       break;
     }
 
@@ -196,15 +217,11 @@ void run_car(simulation_data_t *data, car_t *car) {
   if (path_option_count > 1) {
     // should be current piece of road
     entity_t *curr_e = get_entity(data->entities, car->pos);
-
-    if (curr_e->type != EMPTY_ROAD) {
-      printf("run_car: car not on a road\n");
-      exit(EXIT_FAILURE);
-    }
-
     e_road_t *curr_road = (e_road_t *)curr_e;
 
-    if (curr_road->direction == DIR_COUNT) {
+    if (curr_e->type == EMPTY_ROAD && curr_road->direction != DIR_COUNT) {
+      chosen_dir = curr_road->direction;
+    } else {
       direction_e last = DIR_COUNT;
 
       for (int i = 0; i < path_option_count; i++) {
@@ -231,8 +248,6 @@ void run_car(simulation_data_t *data, car_t *car) {
       if (chosen_dir == DIR_COUNT) {
         chosen_dir = last;
       }
-    } else {
-      chosen_dir = curr_road->direction;
     }
   } else {
     // use the only path option
@@ -382,8 +397,28 @@ void move_car(simulation_data_t *data, car_t *car) {
     return;
   }
 
+  if (dst->type == MAP_EXIT) {
+    car->left = true;
+
+    car->p_pos = car->pos;
+
+    car->pos.x = new_x;
+    car->pos.y = new_y;
+
+    car->speed.x = 0;
+    car->speed.y = 0;
+
+    print_car(car, false);
+    printf("left the map.\n");
+
+    rem_entity(data->entities, (entity_t *)car);
+    free_car(car);
+    return;
+  }
+
   if (dst->type == PARKING) {
     car->parked = true;
+    car->parked_at = data->tick;
 
     car->p_pos = car->pos;
 

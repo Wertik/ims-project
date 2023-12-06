@@ -19,6 +19,33 @@ void add_entity(entity_list_t *list, entity_t *entity) {
   list->entities[list->size - 1] = entity;
 }
 
+void rem_entity(entity_list_t *list, entity_t *entity) {
+  int index = -1;
+  entity_t *found = NULL;
+
+  for (unsigned int i = 0; i < list->size; i++) {
+    entity_t *e = list->entities[i];
+
+    if (e == entity) {
+      index = i;
+      found = e;
+      break;
+    }
+  }
+
+  if (found != NULL && index != -1) {
+    // move everything left by one
+    for (unsigned int i = index; i + 1 < list->size; i++) {
+      list->entities[i] = list->entities[i + 1];
+    }
+
+    list->size -= 1;
+
+    list->entities =
+        (entity_t **)realloc(list->entities, sizeof(entity_t *) * list->size);
+  }
+}
+
 entity_t *get_entity(entity_list_t *list, position_t pos) {
   for (unsigned int i = 0; i < list->size; i++) {
     entity_t *entity = list->entities[i];
@@ -82,17 +109,7 @@ void del_entity(entity_list_t *list, unsigned int idx) {
 void free_entity_list(entity_list_t *list) {
   for (unsigned int i = 0; i < list->size; i++) {
     entity_t *e = list->entities[i];
-    switch (e->type) {
-      case EMPTY_ROAD:
-        free_road_entity((e_road_t *)e);
-        break;
-      case CAR:
-        free_car((car_t *)e);
-        break;
-      default:
-        free_entity(e);
-        break;
-    }
+    free_entity(e);
   }
   free(list->entities);
   free(list);
@@ -132,13 +149,17 @@ car_t *create_car(position_t pos) {
 
   car->parked = false;
   car->waiting = false;
-  car->intersection = false;
+  car->leaving = false;
+  car->parked_at = -1;
 
   car->speed = (position_t){.x = 0, .y = 0};
   car->c_override = false;
 
   car->nav = NULL;
   car->nav_count = 0;
+
+  car->inter_nav = NULL;
+  car->inter_nav_count = 0;
 
   return car;
 }
@@ -157,7 +178,23 @@ void print_car(car_t *car, bool nl) {
   }
 }
 
-void free_entity(entity_t *entity) { free(entity); }
+void free_entity(entity_t *entity) {
+  if (entity == NULL) {
+    return;
+  }
+
+  switch (entity->type) {
+    case EMPTY_ROAD:
+      free_road_entity((e_road_t *)entity);
+      break;
+    case CAR:
+      free_car((car_t *)entity);
+      break;
+    default:
+      free(entity);
+      break;
+  }
+}
 
 void create_entities(entity_list_t *list, position_t positions[], int count,
                      creator_fn_t creator_fn) {
