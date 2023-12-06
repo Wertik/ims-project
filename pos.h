@@ -8,9 +8,9 @@
 
 typedef enum {
   DIR_UP = 0,
+  DIR_LEFT,
   DIR_DOWN,
   DIR_RIGHT,
-  DIR_LEFT,
   // serves to indicate the count of directions
   // as well as an invalid/unser direction
   DIR_COUNT,

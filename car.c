@@ -37,33 +37,57 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
     return;
   }
 
-  // multiple cars
+  car_t *car;
+  direction_e curr_dir;
+  car_t *right_car;
+  car_t *opposite_car;
 
-  direction_e dir = DIR_UP;
+  // Detection of vehicles waiting for priority
+  for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      curr_dir = dir;
+      car = inter->wait_cars[dir];
 
-  while (true) {
-    direction_e curr_dir = dir;
+      if (car == NULL) {
+          continue;
+      }
 
-    dir += 1;
-    if (dir >= DIR_COUNT) {
-      dir = DIR_UP;
-    }
+      right_car = inter->wait_cars[(curr_dir + 1 + DIR_COUNT) % DIR_COUNT];
+      opposite_car = inter->wait_cars[(curr_dir + 2) % DIR_COUNT]; // Car opposite
 
-    car_t *car = inter->wait_cars[curr_dir];
+      printf("Car %d position: %d, %d\n", dir, car->pos.x, car->pos.y);
 
-    if (car == NULL) {
-      continue;
-    }
+      if (right_car != NULL) {
+          car->waiting = true;
+          printf("car %d is waiting for car %d to go\n", curr_dir, (curr_dir + 1 + DIR_COUNT) % DIR_COUNT);
+      } else if (opposite_car != NULL && (car->pos.x < opposite_car->pos.x || car->pos.y < opposite_car->pos.y)) {
+          car->waiting = true;
+          printf("car %d is waiting for the opposite car to go\n", curr_dir);
+      } else {
+          printf("car %d is not waiting\n", curr_dir);
+          car->waiting = false;
+      }
+  }
 
-    // choose who goes randomly
-    if ((rand() % (inter->wait_count + 1)) > 1) {
-      car->waiting = false;
+  // Assigning priority to uninterrupted vehicles
+  for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
+      curr_dir = dir;
+      car = inter->wait_cars[dir];
+      right_car = inter->wait_cars[(curr_dir + 1 + DIR_COUNT) % DIR_COUNT];
+      opposite_car = inter->wait_cars[(curr_dir + 2) % DIR_COUNT]; // Car opposite
+
+      if (car == NULL || car->waiting) {
+          continue;
+      }
+
+      // Cars that are not in a waiting state
       inter->occupied = true;
       rem_car_wait_spot(inter, curr_dir);
-      printf("picked direction %d to go\n", curr_dir);
-      break;
-    }
+      printf("car picked direction %d to go\n", curr_dir);
+      car->waiting = false;
   }
+
+
+
 }
 
 bool run_cars(simulation_data_t *data) {
