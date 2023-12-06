@@ -1,4 +1,5 @@
 #include "builder.h"
+
 #include <unistd.h>
 
 void build_road(simulation_data_t *data, position_t positions[], int count,
@@ -56,61 +57,72 @@ void build_map(simulation_data_t *data, map_e map) {
   printf("Building map %d...\n", map);
 
   switch (map) {
-    case MULTI_ROAD:
-    {
-      // cars starting position 
+    case PARKING_LOT: {
+      // cars starting position
       position_t starting_positions[] = {{5, 3}, {18, 27}};
       int number_of_cars = 2;
 
-      position_t intersection_positions[] = {{18, 12}, {18, 14}, {18, 16}, {18, 18}, {18, 20}};
+      position_t intersection_positions[] = {
+          {18, 12}, {18, 14}, {18, 16}, {18, 18}, {18, 20}};
       int num_intersections = 5;
 
       for (int i = 0; i < num_intersections; i++) {
-          position_t inter_pos = intersection_positions[i];
+        position_t inter_pos = intersection_positions[i];
 
-          build_intersection(data,
-                            (position_t[]){inter_pos},
-                            1,
-                            (inter_spot_data_t[]){
-                                {.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
-                                {.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN},
-                            },
-                            2);
-          
+        build_intersection(
+            data, (position_t[]){inter_pos}, 1,
+            (inter_spot_data_t[]){
+                {.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
+                {.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN},
+            },
+            2);
       }
-
 
       // -- build extended vertical roads for car entrances
       position_t road_positions[] = {
-                    {5, 3}, {5, 4}, {5, 5}, {5, 6}, {5, 7}, {5, 8},
-                    {5, 9}, {5, 10}, {5, 11}, {5, 12}, {5, 13}, {5, 14},
-                    {5, 15}, {5, 16}, {5, 17}, {5, 18}, {5, 19}, {5, 20}
-                };
+          {5, 3},  {5, 4},  {5, 5},  {5, 6},  {5, 7},  {5, 8},
+          {5, 9},  {5, 10}, {5, 11}, {5, 12}, {5, 13}, {5, 14},
+          {5, 15}, {5, 16}, {5, 17}, {5, 18}, {5, 19}, {5, 20}};
 
-                int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
+      int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
 
-                build_road(data, road_positions, num_positions, DIR_DOWN);
+      build_road(data, road_positions, num_positions, DIR_DOWN);
 
       build_road(data,
-                (position_t[]){
-                  {18, 10}, {18, 11}, {18, 13},
-                  {18, 15}, {18, 17}, {18, 19},
-                    {18, 21}, {18, 22}, {18, 23}, {18, 24}, {18, 25}, {18, 26},
-                    {18, 27}
-                },
-                13, DIR_UP);
+                 (position_t[]){{18, 10},
+                                {18, 11},
+                                {18, 13},
+                                {18, 15},
+                                {18, 17},
+                                {18, 19},
+                                {18, 21},
+                                {18, 22},
+                                {18, 23},
+                                {18, 24},
+                                {18, 25},
+                                {18, 26},
+                                {18, 27}},
+                 13, DIR_UP);
 
-      /// -- build horizontal roads for parking access, all going left except the bottom one
+      /// -- build horizontal roads for parking access, all going left except
+      /// the bottom one
       for (int row = 0; row < 6; ++row) {
         int y_offset = 10 + (row * 2);
         direction_e dir = (row == 5) ? DIR_RIGHT : DIR_LEFT;
         build_road(data,
-                  (position_t[]){
-                    {6, y_offset}, {7, y_offset}, {8, y_offset}, {9, y_offset},
-                    {10, y_offset}, {11, y_offset}, {12, y_offset}, {13, y_offset},
-                    {14, y_offset}, {15, y_offset}, {16, y_offset}, {17, y_offset}
-                  },
-                  12, dir);
+                   (position_t[]){{6, y_offset},
+                                  {7, y_offset},
+                                  {8, y_offset},
+                                  {9, y_offset},
+                                  {10, y_offset},
+                                  {11, y_offset},
+                                  {12, y_offset},
+                                  {13, y_offset},
+                                  {14, y_offset},
+                                  {15, y_offset},
+                                  {16, y_offset},
+                                  {17, y_offset}},
+                   12, dir);
       }
 
       // -- add parking spots next to each road
@@ -118,20 +130,21 @@ void build_map(simulation_data_t *data, map_e map) {
         int y_offset = 10 + (row * 2) + 1;
         for (int spot = 0; spot < 12; ++spot) {
           int x_offset = 6 + spot;
-          create_entities(data->entities, (position_t[]){{x_offset, y_offset}}, 1,
-                          creator_parking);
+          create_entities(data->entities, (position_t[]){{x_offset, y_offset}},
+                          1, creator_parking);
         }
       }
 
       // -- adjust road direction for the ends of the vertical roads
-      e_road_t *bottom_left = (e_road_t *)get_entity(data->entities, (position_t){5, 20});
+      e_road_t *bottom_left =
+          (e_road_t *)get_entity(data->entities, (position_t){5, 20});
       bottom_left->direction = DIR_RIGHT;
 
-      e_road_t *top_right = (e_road_t *)get_entity(data->entities, (position_t){18, 10});
+      e_road_t *top_right =
+          (e_road_t *)get_entity(data->entities, (position_t){18, 10});
       top_right->direction = DIR_LEFT;
+      break;
     }
-    break;
-
 
     case SINGLE_INTER:
       // multiple cars meet on a single intersection

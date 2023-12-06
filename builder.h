@@ -32,6 +32,7 @@ typedef enum {
   ROAD_DIR,
   MULTI_ROAD,
   MULTI_INTER,
+  PARKING_LOT,
   MAP_COUNT,
 } map_e;
 

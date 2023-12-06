@@ -27,6 +27,8 @@ direction_e inverse_dir(direction_e dir) {
       printf("inverse_dir: invalid direction index.\n");
       exit(EXIT_FAILURE);
   }
+  // should never occur
+  return DIR_COUNT;
 }
 
 position_t add_dir(position_t pos, direction_e direction) {
