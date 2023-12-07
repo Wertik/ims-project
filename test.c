@@ -113,7 +113,7 @@ int main() {
     add_entity(list, (entity_t *)car);
     add_entity(list, (entity_t *)car_2);
 
-    del_entity(list, (entity_t *)car);
+    rem_entity(list, (entity_t *)car);
 
     ASSERT_EQ(list->size, 1);
 
