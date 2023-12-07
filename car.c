@@ -101,14 +101,14 @@ bool run_cars(simulation_data_t *data) {
       printf("- ");
       print_car(car, true);
 
-      // no need to do anything when parked
-      if (car->left) {
+      // no need to do anything when the car already left
+      if (car->left == true) {
         cars_left &= cars_left;
         continue;
       }
+      cars_left = false;
 
       // car simulation logic
-      cars_left = false;
 
       // path finding logic
       // intersections, roads, etc.

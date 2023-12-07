@@ -75,7 +75,10 @@ int main(int argc, char *argv[]) {
 
   bool quit = false;
 
-  bool do_run = !start_paused;
+  bool paused = start_paused;
+
+  // initial draw in case the simulation is paused
+  draw(renderer, &data);
 
   SDL_Event e;
   while (!quit) {
@@ -85,39 +88,62 @@ int main(int argc, char *argv[]) {
       }
 
       if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-        do_run = !do_run;
+        paused = !paused;
+      }
+
+      if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
+        // d for debug, print information about the simulation
+        entity_list_t *list = data.entities;
+
+        // -- print information about cars
+
+        int car_count = 0;
+        for (unsigned int i = 0; i < list->size; i++) {
+          if (list->entities[i]->type == CAR) {
+            car_count++;
+          }
+        }
+
+        printf("-- Cars (%d)\n", car_count);
+        for (unsigned int i = 0; i < list->size; i++) {
+          if (list->entities[i]->type == CAR) {
+            print_car((car_t *)list->entities[i], true);
+          }
+        }
       }
     }
 
-    if (do_run) {
-      printf("--- Tick #%d\n", data.tick++);
+    if (paused) {
+      continue;
+    }
 
-      if (map == PARKING_LOT && data.tick % 4 == 0 && data.tick <= 12) {
-        generate_cars(&data);
-      }
+    printf("--- Tick #%d\n", data.tick);
 
-      bool should_quit = !run(&data);
-      draw(renderer, &data);
+    if (map == PARKING_LOT && data.tick % 2 == 0 && data.tick <= 200) {
+      generate_cars(&data);
+    }
 
-      // Zpoždění pro lepší pozorování
-      if (map == PARKING_LOT) {
-        SDL_Delay(100);
-      } else {
-        SDL_Delay(400);
-      }
-      printf("---\n");
+    bool should_quit = !run(&data);
+    draw(renderer, &data);
 
-      // run for at least 4 ticks
-      // - wait for car generators
-      if (should_quit && data.tick >= 4) {
-        printf("Stopping...\n");
-        // Pauza pro zobrazení výsledků
-        SDL_Delay(1000);
-        quit = true;
-        continue;
-      }
+    // Zpoždění pro lepší pozorování
+    if (map == PARKING_LOT) {
+      SDL_Delay(100);
     } else {
-      draw(renderer, &data);
+      SDL_Delay(400);
+    }
+
+    printf("---\n");
+    data.tick += 1;
+
+    // run for at least 4 ticks
+    // - wait for car generators
+    if (should_quit && data.tick > 4) {
+      printf("Stopping...\n");
+      // Pauza pro zobrazení výsledků
+      SDL_Delay(1000);
+      quit = true;
+      continue;
     }
   }
 

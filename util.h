@@ -7,3 +7,5 @@
       exit(EXIT_FAILURE); \
     }                     \
   } while (0);
+
+#define BTS(val) (val ? "yes" : "no")

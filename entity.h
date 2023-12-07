@@ -37,6 +37,9 @@ typedef struct {
   // speed per tick
   position_t speed;
 
+  // spawned at what tick?
+  int spawned_at;
+
   // parked?
   bool parked;
   // at what tick the car parked

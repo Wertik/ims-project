@@ -124,9 +124,9 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
         car_t *car = (car_t *)entity;
 
         SDL_Color car_color = CAR_COLOR;
-        if (car->parked) {
+        if (car->parked == true) {
           car_color = CAR_PARKED_COLOR;
-        } else if (car->leaving) {
+        } else if (car->leaving == true) {
           car_color = CAR_LEAVING_COLOR;
         }
 

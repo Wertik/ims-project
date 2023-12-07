@@ -150,7 +150,9 @@ car_t *create_car(position_t pos) {
   car->parked = false;
   car->waiting = false;
   car->leaving = false;
+  car->left = false;
   car->parked_at = -1;
+  car->spawned_at = 0;
 
   car->speed = (position_t){.x = 0, .y = 0};
   car->c_override = false;
@@ -167,14 +169,13 @@ car_t *create_car(position_t pos) {
 void free_car(car_t *car) { free(car); }
 
 void print_car(car_t *car, bool nl) {
+  printf(
+      "car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s, leaving=%s, "
+      "left=%s, spawned_at=%d\n",
+      car->pos.x, car->pos.y, car->speed.x, car->speed.y, BTS(car->parked),
+      BTS(car->waiting), BTS(car->leaving), BTS(car->left), car->spawned_at);
   if (nl) {
-    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s\n", car->pos.x,
-           car->pos.y, car->speed.x, car->speed.y, car->parked ? "yes" : "no",
-           car->waiting ? "yes" : "no");
-  } else {
-    printf("car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s: ", car->pos.x,
-           car->pos.y, car->speed.x, car->speed.y, car->parked ? "yes" : "no",
-           car->waiting ? "yes" : "no");
+    printf("\n");
   }
 }
 
