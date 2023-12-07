@@ -194,7 +194,7 @@ void run_car(simulation_data_t *data, car_t *car) {
       break;
     }
 
-    if (entity->type == MAP_EXIT && car->leaving) {
+    if (entity->type == MAP_EXIT) {
       chosen_dir = dir;
       printf("found exit.\n");
       break;
