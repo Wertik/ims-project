@@ -38,56 +38,52 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
   }
 
   car_t *car;
-  direction_e curr_dir;
   car_t *right_car;
   car_t *opposite_car;
 
   // Detection of vehicles waiting for priority
   for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
-      curr_dir = dir;
-      car = inter->wait_cars[dir];
+    car = inter->wait_cars[dir];
 
-      if (car == NULL) {
-          continue;
-      }
+    if (car == NULL) {
+      continue;
+    }
 
-      right_car = inter->wait_cars[(curr_dir + 1 + DIR_COUNT) % DIR_COUNT];
-      opposite_car = inter->wait_cars[(curr_dir + 2) % DIR_COUNT]; // Car opposite
+    right_car = inter->wait_cars[(dir + 1 + DIR_COUNT) % DIR_COUNT];
+    opposite_car = inter->wait_cars[(dir + 2) % DIR_COUNT];  // Car opposite
 
-      printf("Car %d position: %d, %d\n", dir, car->pos.x, car->pos.y);
+    printf("Car %d position: %d, %d\n", dir, car->pos.x, car->pos.y);
 
-      if (right_car != NULL) {
-          car->waiting = true;
-          printf("car %d is waiting for car %d to go\n", curr_dir, (curr_dir + 1 + DIR_COUNT) % DIR_COUNT);
-      } else if (opposite_car != NULL && (car->pos.x < opposite_car->pos.x || car->pos.y < opposite_car->pos.y)) {
-          car->waiting = true;
-          printf("car %d is waiting for the opposite car to go\n", curr_dir);
-      } else {
-          printf("car %d is not waiting\n", curr_dir);
-          car->waiting = false;
-      }
+    if (right_car != NULL) {
+      car->waiting = true;
+      printf("car %d is waiting for car %d to go\n", dir,
+             (dir + 1 + DIR_COUNT) % DIR_COUNT);
+    } else if (opposite_car != NULL && (car->pos.x < opposite_car->pos.x ||
+                                        car->pos.y < opposite_car->pos.y)) {
+      car->waiting = true;
+      printf("car %d is waiting for the opposite car to go\n", dir);
+    } else {
+      printf("car %d is not waiting\n", dir);
+      car->waiting = false;
+    }
   }
 
   // Assigning priority to uninterrupted vehicles
   for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
-      curr_dir = dir;
-      car = inter->wait_cars[dir];
-      right_car = inter->wait_cars[(curr_dir + 1 + DIR_COUNT) % DIR_COUNT];
-      opposite_car = inter->wait_cars[(curr_dir + 2) % DIR_COUNT]; // Car opposite
+    car = inter->wait_cars[dir];
+    right_car = inter->wait_cars[(dir + 1 + DIR_COUNT) % DIR_COUNT];
+    opposite_car = inter->wait_cars[(dir + 2) % DIR_COUNT];  // Car opposite
 
-      if (car == NULL || car->waiting) {
-          continue;
-      }
+    if (car == NULL || car->waiting) {
+      continue;
+    }
 
-      // Cars that are not in a waiting state
-      inter->occupied = true;
-      rem_car_wait_spot(inter, curr_dir);
-      printf("car picked direction %d to go\n", curr_dir);
-      car->waiting = false;
+    // Cars that are not in a waiting state
+    inter->occupied = true;
+    rem_car_wait_spot(inter, dir);
+    printf("car picked direction %d to go\n", dir);
+    car->waiting = false;
   }
-
-
-
 }
 
 bool run_cars(simulation_data_t *data) {

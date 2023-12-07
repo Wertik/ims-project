@@ -94,25 +94,6 @@ void build_map(simulation_data_t *data, map_e map) {
       ADD_CARS(data, ARR({{9, 10}, {14, 14}}));
       break;
     case PARKING_LOT: {
-      // cars starting position
-
-      position_t intersection_positions[] = {
-          {18, 12}, {18, 14}, {18, 16}, {18, 18}, {18, 20}};
-      int num_intersections = 5;
-
-      for (int i = 0; i < num_intersections; i++) {
-        position_t inter_pos = intersection_positions[i];
-
-        BUILD_INTER(
-            data, ARR({inter_pos}),
-            ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}}),
-            ARR({{.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
-                 {.pos = {inter_pos.x - 1, inter_pos.y}, .dir = DIR_LEFT}}));
-      }
-
-      BUILD_INTER(data, ARR({{5, 20}}), ARR({{{5, 19}, DIR_UP}}),
-                  ARR({{{6, 20}, DIR_RIGHT}, {{5, 21}, DIR_DOWN}}));
-
       // -- build extended vertical roads for car entrances
       position_t road_positions[] = {
           {5, 3},  {5, 4},  {5, 5},  {5, 6},  {5, 7},  {5, 8},  {5, 9},
@@ -159,6 +140,30 @@ void build_map(simulation_data_t *data, map_e map) {
                                   {17, y_offset}},
                    12, dir);
       }
+
+      // cars starting position
+
+      position_t intersection_positions[] = {
+          {18, 12}, {18, 14}, {18, 16}, {18, 18}};
+      int num_intersections = 4;
+
+      for (int i = 0; i < num_intersections; i++) {
+        position_t inter_pos = intersection_positions[i];
+
+        BUILD_INTER(
+            data, ARR({inter_pos}),
+            ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}}),
+            ARR({{.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
+                 {.pos = {inter_pos.x - 1, inter_pos.y}, .dir = DIR_LEFT}}));
+      }
+
+      BUILD_INTER(data, ARR({{18, 20}}),
+                  ARR({{.pos = {18, 21}, .dir = DIR_DOWN},
+                       {.pos = {17, 20}, .dir = DIR_LEFT}}),
+                  ARR({{.pos = {18, 19}, .dir = DIR_UP}}));
+
+      BUILD_INTER(data, ARR({{5, 20}}), ARR({{{5, 19}, DIR_UP}}),
+                  ARR({{{6, 20}, DIR_RIGHT}, {{5, 21}, DIR_DOWN}}));
 
       // -- add parking spots next to each road
       for (int row = 0; row < 5; ++row) {
