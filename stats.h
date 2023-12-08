@@ -10,6 +10,8 @@ typedef struct {
     float avg_until_leave;
     // average time waiting at an intersection
     float avg_inter_wait;
+    // percentual representation of how many cars left without parking
+    float perc_left_without_park;
 } stats_t;
 
 // calculate the statistics

@@ -20,7 +20,7 @@
 #define CELL_SIZE 20
 
 // how many ticks a car should wait at the parking spot
-#define CAR_PARKED_TICKS 10
+#define CAR_PARKED_TICKS 40
 
 typedef struct {
   road_list_t *roads;

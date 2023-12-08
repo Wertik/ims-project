@@ -206,8 +206,8 @@ void build_map(simulation_data_t *data, map_e map) {
           (e_road_t *)get_entity(data->entities, (position_t){26, 10});
       top_right->direction = DIR_LEFT;
 
-      ADD_GENERATOR(data, ARR({5, 3}), 2, 100);
-      ADD_GENERATOR(data, ARR({26, 27}), 2, 100);
+      ADD_GENERATOR(data, ARR({5, 3}), 4, 100);
+      ADD_GENERATOR(data, ARR({26, 27}), 4, 100);
       break;
     }
 

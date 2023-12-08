@@ -417,10 +417,16 @@ void run_car(simulation_data_t *data, car_t *car) {
 
       road_t *road = get_road(data->roads, opt->pos);
 
-      bool choose_road =
-          road != NULL && road->has_exit == true && car->leaving == true;
+      bool choose_road = false;
 
-      if (choose_road == false) {
+      if (road != NULL && road->has_exit == true) {
+        if (car->leaving == true) {
+          choose_road = true;
+        } else {
+          // car is not leaving, have a 10% chance that we leave anyway
+          choose_road = (rand() % 99) < 10;
+        }
+      } else {
         choose_road = (rand() % (count + 1)) >= 1;
       }
 
