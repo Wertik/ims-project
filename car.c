@@ -111,7 +111,7 @@ bool run_cars(simulation_data_t *data) {
   entity_list_t *list = data->entities;
 
   // move cars according to their speed
-  for (unsigned int i = 0; i < list->size; i++) {
+  for (unsigned int i = 0; i < list->size;) {
     entity_t *entity = list->entities[i];
 
     if (entity->type == CAR) {
@@ -123,6 +123,7 @@ bool run_cars(simulation_data_t *data) {
       // no need to do anything when the car already left
       if (car->left == true) {
         cars_left &= cars_left;
+        i++;
         continue;
       }
       cars_left = false;
@@ -136,7 +137,13 @@ bool run_cars(simulation_data_t *data) {
 
       // apply speed to the current position of the car
       move_car(data, car);
+
+      // the car left, repeat this index (entities got shifted left)
+      if (car->left == true) {
+        continue;
+      }
     }
+    i++;
   }
 
   return !cars_left;
