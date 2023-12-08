@@ -1,3 +1,4 @@
+#include "car.h"
 #include "entity.h"
 #include "road.h"
 
@@ -105,19 +106,19 @@ int main() {
   }
 
   {
-    entity_list_t *list = create_entity_list();
+    car_list_t *list = create_car_list();
 
     car_t *car = create_car((position_t){0, 0});
     car_t *car_2 = create_car((position_t){1, 1});
 
-    add_entity(list, (entity_t *)car);
-    add_entity(list, (entity_t *)car_2);
+    add_car(list, car);
+    add_car(list, car_2);
 
-    rem_entity(list, (entity_t *)car);
+    rem_car(list, car);
 
     ASSERT_EQ(list->size, 1);
 
-    free_entity_list(list);
+    free_car_list(list);
   }
 
   printf("Tests ran successfully.\n");

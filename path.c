@@ -83,7 +83,9 @@ int main(int argc, char *argv[]) {
                             .entities = create_entity_list(),
                             .intersections = create_inter_list(),
                             .generators = create_gen_list(),
-                            .tick = 0};
+                            .cars = create_car_list(),
+                            .tick = 0,
+                            .paused = start_paused};
 
   build_map(&data, map);
 
@@ -92,8 +94,6 @@ int main(int argc, char *argv[]) {
   srand(time(NULL));
 
   bool quit = false;
-
-  bool paused = start_paused;
 
   // initial draw in case the simulation is paused
   draw(renderer, &data);
@@ -106,27 +106,15 @@ int main(int argc, char *argv[]) {
       }
 
       if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-        paused = !paused;
+        data.paused = !data.paused;
       }
 
       if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
-        // d for debug, print information about the simulation
-        entity_list_t *list = data.entities;
-
         // -- print information about cars
 
-        int car_count = 0;
-        for (unsigned int i = 0; i < list->size; i++) {
-          if (list->entities[i]->type == CAR) {
-            car_count++;
-          }
-        }
-
-        printf("-- Cars (%d)\n", car_count);
-        for (unsigned int i = 0; i < list->size; i++) {
-          if (list->entities[i]->type == CAR) {
-            print_car((car_t *)list->entities[i], true);
-          }
+        printf("-- Cars (%d)\n", data.cars->size);
+        for (int i = 0; i < data.cars->size; i++) {
+          print_car(data.cars->data[i], true);
         }
       }
 
@@ -137,14 +125,34 @@ int main(int argc, char *argv[]) {
 
         // get the cell coordinates
 
-        int pos_x = x / CELL_SIZE;
-        int pos_y = y / CELL_SIZE;
+        unsigned int pos_x = x / CELL_SIZE;
+        unsigned int pos_y = y / CELL_SIZE;
 
         printf("Clicked at [%d;%d]\n", pos_x, pos_y);
+
+        // Print all the entities on this location
+
+        for (unsigned int i = 0; i < data.entities->size; i++) {
+          entity_t *e = data.entities->entities[i];
+
+          if (e->pos.x == pos_x && e->pos.y == pos_y) {
+            print_entity(e, true);
+          }
+        }
+
+        // print cars
+
+        for (int i = 0; i < data.cars->size; i++) {
+          car_t *car = data.cars->data[i];
+
+          if (car->pos.x == pos_x && car->pos.y == pos_y) {
+            print_car(car, true);
+          }
+        }
       }
     }
 
-    if (paused) {
+    if (data.paused) {
       continue;
     }
 
@@ -174,6 +182,7 @@ int main(int argc, char *argv[]) {
   free_road_list(data.roads);
   free_inter_list(data.intersections);
   free_gen_list(data.generators);
+  free_car_list(data.cars);
 
   close_SDL(window, renderer);
   return 0;

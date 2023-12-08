@@ -9,7 +9,6 @@
 
 typedef enum {
   EMPTY_ROAD,
-  CAR,
   PARKING,
   MAP_EXIT,
 } entity_type_e;
@@ -31,48 +30,6 @@ typedef struct {
   bool c_override;
   SDL_Color color;
 
-  // previous position
-  // - for intersection decisions (don't wanna go back)
-  position_t p_pos;
-  // speed per tick
-  position_t speed;
-
-  // spawned at what tick?
-  int spawned_at;
-
-  // parked?
-  bool parked;
-  // at what tick the car parked
-  int parked_at;
-
-  // waiting on intersection?
-  bool waiting;
-
-  // leaving the map, looking for an exit
-  bool leaving;
-
-  // car is finished with the simulation
-  bool left;
-
-  // navigation through the whole map
-  // aka what direction to take on intersections
-  direction_e *inter_nav;
-  int inter_nav_count;
-
-  // immediate navigation steps
-  // aka what directions to take right now
-  direction_e *nav;
-  int nav_count;
-} car_t;
-
-typedef struct {
-  entity_type_e type;
-
-  position_t pos;
-
-  bool c_override;
-  SDL_Color color;
-
   // forced road cell direction, if any
   direction_e direction;
 } e_road_t;
@@ -83,6 +40,8 @@ typedef struct {
 } entity_list_t;
 
 typedef entity_t *(*creator_fn_t)(position_t pos);
+
+const char *pretty_type(entity_type_e type);
 
 entity_list_t *create_entity_list();
 void add_entity(entity_list_t *list, entity_t *entity);
@@ -99,20 +58,11 @@ void free_entity(entity_t *entity);
 
 e_road_t *create_road_entity(position_t pos);
 void free_road_entity(e_road_t *road);
-
-car_t *create_car(position_t pos);
-void free_car(car_t *car);
-
-// print information about a car
-void print_car(car_t *car, bool nl);
+void print_road_e(e_road_t *road, bool nl);
+void print_entity(entity_t *e, bool nl);
 
 void create_entities(entity_list_t *list, position_t positions[], int count,
                      creator_fn_t creator_fn);
 
 entity_t *creator_road(position_t pos);
 entity_t *creator_parking(position_t pos);
-entity_t *creator_car(position_t pos);
-
-void add_nav_steps(car_t *car, direction_e steps[], int count);
-// pop a navigation step
-direction_e pop_nav_step(car_t *car);

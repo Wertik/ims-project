@@ -243,9 +243,7 @@ void build_map(simulation_data_t *data, map_e map) {
 
       // -- add cars
 
-      create_entities(data->entities,
-                      (position_t[]){{9, 10}, {12, 13}, {15, 10}}, 3,
-                      creator_car);
+      ADD_CARS(data, ARR({{9, 10}, {12, 13}, {15, 10}}));
       break;
     case ROAD_DIR:
       // test road option picking for allowed directions on road tiles
@@ -281,7 +279,7 @@ void build_map(simulation_data_t *data, map_e map) {
                       creator_parking);
 
       // -- add cars
-      create_entities(data->entities, (position_t[]){{9, 10}}, 1, creator_car);
+      ADD_CARS(data, ARR({{9, 10}}));
       break;
     default:
       printf("build_map: Invalid map chosen.\n");

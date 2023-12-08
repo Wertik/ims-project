@@ -2,6 +2,7 @@
 
 #include "pos.h"
 #include "road.h"
+#include "car.h"
 
 // an intersection
 // - when an intersection is occupied, don't allow any more cars onto it

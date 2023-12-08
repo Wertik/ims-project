@@ -139,43 +139,38 @@ e_road_t *create_road_entity(position_t pos) {
 
 void free_road_entity(e_road_t *e) { free(e); }
 
-car_t *create_car(position_t pos) {
-  car_t *car = (car_t *)malloc(sizeof(car_t));
-  MERROR(car);
-
-  car->type = CAR;
-  car->pos = pos;
-  car->p_pos = pos;
-
-  car->parked = false;
-  car->waiting = false;
-  car->leaving = false;
-  car->left = false;
-  car->parked_at = -1;
-  car->spawned_at = 0;
-
-  car->speed = (position_t){.x = 0, .y = 0};
-  car->c_override = false;
-
-  car->nav = NULL;
-  car->nav_count = 0;
-
-  car->inter_nav = NULL;
-  car->inter_nav_count = 0;
-
-  return car;
+const char *pretty_type(entity_type_e type) {
+  switch (type) {
+    case EMPTY_ROAD:
+      return "EMPTY_ROAD";
+    case PARKING:
+      return "PARKING";
+    case MAP_EXIT:
+      return "MAP_EXIT";
+    default:
+      return "UNKNOWN_TYPE";
+  }
+  return "UNKNOWN_TYPE";
 }
 
-void free_car(car_t *car) { free(car); }
+void print_entity(entity_t *e, bool nl) {
+  switch (e->type) {
+    case EMPTY_ROAD:
+      print_road_e((e_road_t *)e, nl);
+      break;
+    default:
+      printf("entity %s @ [%d;%d]", pretty_type(e->type), e->pos.x, e->pos.y);
+      break;
+  }
+}
 
-void print_car(car_t *car, bool nl) {
-  printf(
-      "car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s, leaving=%s, "
-      "left=%s, spawned_at=%d\n",
-      car->pos.x, car->pos.y, car->speed.x, car->speed.y, BTS(car->parked),
-      BTS(car->waiting), BTS(car->leaving), BTS(car->left), car->spawned_at);
-  if (nl) {
+void print_road_e(e_road_t *road, bool nl) {
+  printf("empty road @ [%d;%d]", road->pos.x, road->pos.y);
+
+  if (nl == true) {
     printf("\n");
+  } else {
+    printf(": ");
   }
 }
 
@@ -187,9 +182,6 @@ void free_entity(entity_t *entity) {
   switch (entity->type) {
     case EMPTY_ROAD:
       free_road_entity((e_road_t *)entity);
-      break;
-    case CAR:
-      free_car((car_t *)entity);
       break;
     default:
       free(entity);
@@ -218,53 +210,4 @@ entity_t *creator_parking(position_t pos) {
   entity_t *entity = create_entity(pos);
   entity->type = PARKING;
   return entity;
-}
-
-entity_t *creator_car(position_t pos) {
-  car_t *car = create_car(pos);
-  return (entity_t *)car;
-}
-
-void add_nav_steps(car_t *car, direction_e steps[], int count) {
-  int new_count = car->nav_count + count;
-
-  car->nav =
-      (direction_e *)realloc(car->nav, sizeof(direction_e) * (new_count));
-  MERROR(car->nav);
-
-  for (int i = car->nav_count; i < new_count; i++) {
-    car->nav[i] = steps[i - car->nav_count];
-  }
-
-  car->nav_count = new_count;
-}
-
-// pop a navigation step
-direction_e pop_nav_step(car_t *car) {
-  if (car->nav == NULL) {
-    return DIR_COUNT;
-  }
-
-  direction_e res = car->nav[0];
-
-  if (car->nav_count == 1) {
-    // last element
-    free(car->nav);
-    car->nav = NULL;
-    car->nav_count = 0;
-    return res;
-  }
-
-  // shift all steps left by one
-  for (int i = 0; i + 1 < car->nav_count; i++) {
-    car->nav[i] = car->nav[i + 1];
-  }
-
-  // shrink by one
-  car->nav = (direction_e *)realloc(
-      car->nav, sizeof(direction_e *) * (car->nav_count - 1));
-  MERROR(car->nav);
-
-  car->nav_count -= 1;
-  return res;
 }

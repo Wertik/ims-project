@@ -46,12 +46,15 @@
     create_entities(data->entities, positions, count, creator_parking); \
   } while (0);
 
-#define ADD_CARS(DATA, POSITIONS)                                   \
-  do {                                                              \
-    position_t positions[] = POSITIONS;                             \
-    int count = sizeof(positions) / sizeof(position_t);             \
-                                                                    \
-    create_entities(data->entities, positions, count, creator_car); \
+#define ADD_CARS(DATA, POSITIONS)                       \
+  do {                                                  \
+    position_t positions[] = POSITIONS;                 \
+    int count = sizeof(positions) / sizeof(position_t); \
+                                                        \
+    for (int i = 0; i < count; i++) {                   \
+      car_t *car = create_car(positions[i]);            \
+      add_car(data->cars, car);                         \
+    }                                                   \
   } while (0);
 
 #define ADD_GENERATOR(DATA, POSITION, INTERVAL, COUNT)         \

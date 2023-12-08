@@ -5,6 +5,7 @@
 #include "entity.h"
 #include "inter.h"
 #include "road.h"
+#include "car.h"
 #include "generator.h"
 
 // -- simulation settings
@@ -26,5 +27,19 @@ typedef struct {
   entity_list_t *entities;
   inter_list_t *intersections;
   gen_list_t *generators;
+  car_list_t *cars;
+
   int tick;
+  bool paused;
 } simulation_data_t;
+
+void run_generators(simulation_data_t *data);
+void run_generator(simulation_data_t *data, generator_t *gen);
+
+void run_inters(simulation_data_t *data);
+void run_inter(simulation_data_t *data, inter_t *inter);
+
+bool run_cars(simulation_data_t *data);
+void run_car(simulation_data_t *data, car_t *car);
+
+void move_car(simulation_data_t *data, car_t *car);

@@ -1,18 +1,70 @@
 #pragma once
 
-#include "road.h"
 #include "pos.h"
-#include "simulation.h"
+#include "road.h"
 
-// car navigation logic
+typedef struct {
+  position_t pos;
 
-void run_generators(simulation_data_t *data);
-void run_generator(simulation_data_t *data, generator_t *gen);
+  bool c_override;
+  SDL_Color color;
 
-void run_inters(simulation_data_t *data);
-void run_inter(simulation_data_t *data, inter_t *inter);
+  // previous position
+  // - for intersection decisions (don't wanna go back)
+  position_t p_pos;
+  // speed per tick
+  position_t speed;
 
-bool run_cars(simulation_data_t *data);
-void run_car(simulation_data_t *data, car_t *car);
+  // spawned at what tick?
+  int spawned_at;
 
-void move_car(simulation_data_t *data, car_t *car);
+  // parked?
+  bool parked;
+  // at what tick the car parked
+  int parked_at;
+
+  // waiting on intersection?
+  bool waiting;
+
+  // leaving the map, looking for an exit
+  bool leaving;
+
+  // car is finished with the simulation
+  bool left;
+
+  // navigation through the whole map
+  // aka what direction to take on intersections
+  direction_e *inter_nav;
+  int inter_nav_count;
+
+  // immediate navigation steps
+  // aka what directions to take right now
+  direction_e *nav;
+  int nav_count;
+} car_t;
+
+typedef struct {
+    int size;
+    car_t **data;
+} car_list_t;
+
+car_list_t *create_car_list();
+void add_car(car_list_t *list, car_t *car);
+void rem_car(car_list_t *list, car_t *car);
+
+car_t *get_car(car_list_t *list, position_t pos);
+car_t **get_cars_around(car_list_t *list, position_t pos);
+
+void free_car_list(car_list_t *list);
+
+car_t *create_car(position_t pos);
+void free_car(car_t *car);
+
+// print information about a car
+void print_car(car_t *car, bool nl);
+
+void add_nav_steps(car_t *car, direction_e steps[], int count);
+direction_e get_nav_step(car_t *car);
+
+// pop a navigation step
+direction_e pop_nav_step(car_t *car);

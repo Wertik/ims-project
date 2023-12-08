@@ -120,19 +120,6 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
         }
         break;
       }
-      case CAR: {
-        car_t *car = (car_t *)entity;
-
-        SDL_Color car_color = CAR_COLOR;
-        if (car->parked == true) {
-          car_color = CAR_PARKED_COLOR;
-        } else if (car->leaving == true) {
-          car_color = CAR_LEAVING_COLOR;
-        }
-
-        render_entity(renderer, entity, car_color, true);
-        break;
-      }
       case MAP_EXIT: {
         render_entity(renderer, entity, MAP_EXIT_COLOR, false);
         break;
@@ -142,6 +129,33 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
         break;
       }
     }
+  }
+
+  // render cars
+  for (int i = 0; i < data->cars->size; i++) {
+    car_t *car = data->cars->data[i];
+
+    SDL_Color car_color = CAR_COLOR;
+    if (car->parked == true) {
+      car_color = CAR_PARKED_COLOR;
+    } else if (car->leaving == true) {
+      car_color = CAR_LEAVING_COLOR;
+    }
+
+    SDL_Color real_color = car->c_override ? car->color : car_color;
+    SDL_SetRenderDrawColor(renderer, RGBA(real_color));
+
+    SDL_Rect rect = {.x = car->pos.x * CELL_SIZE,
+                     .y = car->pos.y * CELL_SIZE,
+                     .w = CELL_SIZE,
+                     .h = CELL_SIZE};
+
+    rect.x = rect.x + PADDING / 2;
+    rect.y = rect.y + PADDING / 2;
+    rect.w = rect.w - PADDING;
+    rect.h = rect.h - PADDING;
+
+    SDL_RenderFillRect(renderer, &rect);
   }
 
   // render road borders
