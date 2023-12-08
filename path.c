@@ -200,9 +200,9 @@ int main(int argc, char *argv[]) {
   map_e map = SINGLE_INTER;
   bool start_paused = false;
   int sim_speed = 400;
-  bool graph = false;
+  bool graph = true;
 
-  while ((opt = getopt(argc, argv, "phm:s:g")) != -1) {
+  while ((opt = getopt(argc, argv, "phm:s:l")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
             "-p start the simulation paused\n"
             "-m MAP id of map to use for the simulation (enum map_e)\n"
             "-s SPEED time in ms to wait each tick\n"
-            "-g run with a graphical interface\n");
+            "-l run without a graphical interface\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
@@ -231,8 +231,8 @@ int main(int argc, char *argv[]) {
         sim_speed = s;
         break;
       }
-      case 'g':
-        graph = true;
+      case 'l':
+        graph = false;
         break;
       case 'p':
         start_paused = true;
