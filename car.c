@@ -13,6 +13,7 @@ void run_generator(simulation_data_t *data, generator_t *gen) {
     gen->gen_count += 1;
 
     car_t *car = create_car(gen->pos);
+    car->leaving = true;
     add_entity(data->entities, (entity_t *)car);
 
     printf("generated a car on %d;%d\n", gen->pos.x, gen->pos.y);

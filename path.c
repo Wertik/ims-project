@@ -14,10 +14,13 @@ extern char *optarg;
 extern int optind, opterr, optopt;
 
 bool run(simulation_data_t *data) {
+  run_inters(data);
+  bool run_sim = run_cars(data);
+
+  // run generators last to draw freshly generated cars before they move
   run_generators(data);
 
-  run_inters(data);
-  return run_cars(data);
+  return run_sim;
 }
 
 int main(int argc, char *argv[]) {

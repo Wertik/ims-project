@@ -78,7 +78,7 @@ void build_map(simulation_data_t *data, map_e map) {
       add_entity(data->entities, map_exit);
 
       // add a generator
-      ADD_GENERATOR(data, ARR({5, 10}), 4, -1);
+      ADD_GENERATOR(data, ARR({5, 10}), 2, -1);
       break;
     }
     case MULTI_INTER:
