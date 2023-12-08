@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 void build_road(simulation_data_t *data, position_t positions[], int count,
-                direction_e dir) {
+                direction_e dir, bool has_exit) {
   road_t *road = create_road();
 
   for (int i = 0; i < count; i++) {
@@ -15,6 +15,8 @@ void build_road(simulation_data_t *data, position_t positions[], int count,
     add_entity(data->entities, (entity_t *)road_e);
     add_part(road, road_e);
   }
+
+  road->has_exit = has_exit;
 
   add_road(data->roads, road);
 }
@@ -64,6 +66,33 @@ void build_map(simulation_data_t *data, map_e map) {
   printf("Building map %d...\n", map);
 
   switch (map) {
+    case LEAVE_NAV: {
+      // test that the car always chooses the map exit when leaving
+
+      BUILD_ROAD(data, ARR({{5, 10}, {6, 10}, {7, 10}, {8, 10}, {9, 10}}),
+                 DIR_RIGHT);
+
+      BUILD_EXIT_ROAD(data, ARR({{10, 9}, {10, 8}, {10, 7}, {10, 6}}), DIR_UP);
+
+      BUILD_ROAD(data, ARR({{11, 10}, {12, 10}, {13, 10}}), DIR_RIGHT);
+      BUILD_ROAD(data, ARR({{14, 10}, {14, 11}, {14, 12}}), DIR_DOWN);
+      BUILD_ROAD(data, ARR({{14, 13}, {13, 13}, {12, 13}, {11, 13}}), DIR_LEFT);
+      BUILD_ROAD(data, ARR({{10, 13}, {10, 12}, {10, 11}}), DIR_UP);
+
+      BUILD_INTER(data, ARR({{10, 10}}),
+                  ARR({{{9, 10}, DIR_LEFT}, {{10, 11}, DIR_DOWN}}),
+                  ARR({{{10, 9}, DIR_UP}, {{11, 10}, DIR_RIGHT}}));
+
+      entity_t *map_exit = create_entity((position_t){10, 5});
+      map_exit->type = MAP_EXIT;
+      add_entity(data->entities, map_exit);
+
+      // spawn a car
+      car_t *car = create_car((position_t){5, 10});
+      car->leaving = true;
+      add_entity(data->entities, (entity_t *)car);
+      break;
+    }
     case MULTI_INTER:
       // intersection on a 2 lane road
 
@@ -102,7 +131,7 @@ void build_map(simulation_data_t *data, map_e map) {
 
       int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
 
-      build_road(data, road_positions, num_positions, DIR_DOWN);
+      build_road(data, road_positions, num_positions, DIR_DOWN, true);
 
       build_road(data,
                  (position_t[]){{18, 10},
@@ -118,7 +147,7 @@ void build_map(simulation_data_t *data, map_e map) {
                                 {18, 25},
                                 {18, 26},
                                 {18, 27}},
-                 13, DIR_UP);
+                 13, DIR_UP, false);
 
       /// -- build horizontal roads for parking access, all going left except
       /// the bottom one
@@ -138,7 +167,7 @@ void build_map(simulation_data_t *data, map_e map) {
                                   {15, y_offset},
                                   {16, y_offset},
                                   {17, y_offset}},
-                   12, dir);
+                   12, dir, false);
       }
 
       // cars starting position
@@ -181,9 +210,6 @@ void build_map(simulation_data_t *data, map_e map) {
       add_entity(data->entities, map_exit);
 
       // -- adjust road direction for the ends of the vertical roads
-      /* e_road_t *bottom_left =
-          (e_road_t *)get_entity(data->entities, (position_t){5, 20});
-      bottom_left->direction = DIR_RIGHT; */
 
       e_road_t *top_right =
           (e_road_t *)get_entity(data->entities, (position_t){18, 10});
@@ -197,14 +223,14 @@ void build_map(simulation_data_t *data, map_e map) {
       // -- build roads
 
       build_road(data, (position_t[]){{9, 10}, {10, 10}, {11, 10}}, 3,
-                 DIR_RIGHT);
+                 DIR_RIGHT, false);
 
-      build_road(data, (position_t[]){{12, 11}, {12, 12}, {12, 13}}, 3, DIR_UP);
+      build_road(data, (position_t[]){{12, 11}, {12, 12}, {12, 13}}, 3, DIR_UP, false);
 
-      build_road(data, (position_t[]){{12, 9}, {12, 8}, {12, 7}}, 3, DIR_UP);
+      build_road(data, (position_t[]){{12, 9}, {12, 8}, {12, 7}}, 3, DIR_UP, false);
 
       build_road(data, (position_t[]){{13, 10}, {14, 10}, {15, 10}}, 3,
-                 DIR_LEFT);
+                 DIR_LEFT, false);
 
       // -- build intersections
 
@@ -238,19 +264,19 @@ void build_map(simulation_data_t *data, map_e map) {
                                 {13, 10},
                                 {14, 10},
                                 {15, 10}},
-                 7, DIR_RIGHT);
+                 7, DIR_RIGHT, false);
 
       // shouldn't be chosen
-      build_road(data, (position_t[]){{10, 9}, {10, 8}}, 2, DIR_DOWN);
+      build_road(data, (position_t[]){{10, 9}, {10, 8}}, 2, DIR_DOWN, false);
 
       // shouldn't be chosen
-      build_road(data, (position_t[]){{12, 11}, {12, 12}}, 2, DIR_UP);
+      build_road(data, (position_t[]){{12, 11}, {12, 12}}, 2, DIR_UP, false);
 
       // allowed (but has only a chance)
-      build_road(data, (position_t[]){{14, 9}, {14, 8}}, 2, DIR_UP);
+      build_road(data, (position_t[]){{14, 9}, {14, 8}}, 2, DIR_UP, false);
 
       // a turn
-      build_road(data, (position_t[]){{16, 10}, {16, 11}}, 2, DIR_DOWN);
+      build_road(data, (position_t[]){{16, 10}, {16, 11}}, 2, DIR_DOWN, false);
 
       // -- add parking spots
 

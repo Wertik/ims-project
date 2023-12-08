@@ -298,14 +298,14 @@ void run_car(simulation_data_t *data, car_t *car) {
 
   // -- moving to an intersection wait point
 
-  e_road_t *road = (e_road_t *)around[chosen_dir];
+  e_road_t *wait_spot = (e_road_t *)around[chosen_dir];
 
   // if the road is an waiting point for intersection
-  inter_t *inter = get_inter_wait(data->intersections, road->pos);
+  inter_t *inter = get_inter_wait(data->intersections, wait_spot->pos);
 
   if (inter != NULL) {
     // add the car to waiting cars on the intersection
-    direction_e inter_dir = get_inter_wait_dir(inter, road->pos);
+    direction_e inter_dir = get_inter_wait_dir(inter, wait_spot->pos);
 
     car->waiting = true;
 
@@ -347,16 +347,29 @@ void run_car(simulation_data_t *data, car_t *car) {
         continue;
       }
 
-      // chance to pick this road
+      // pick this road?
+      // - if the road leads to exit and we're leaving
+      // - based on chance otherwise
 
-      if ((rand() % (count + 1)) >= 1) {
+      road_t *road = get_road(data->roads, opt->pos);
+
+      bool choose_road =
+          road != NULL && road->has_exit == true && car->leaving == true;
+
+      if (choose_road == false) {
+        choose_road = (rand() % (count + 1)) >= 1;
+      }
+
+      if (choose_road) {
+        // navigate the car through the intersection
+
         int nav_count = 0;
         direction_e *nav =
-            get_nav(road->pos, opt->pos,
+            get_nav(wait_spot->pos, opt->pos,
                     inter_dir == DIR_DOWN || inter_dir == DIR_UP, &nav_count);
 
         printf("navigate from ");
-        print_pos(road->pos);
+        print_pos(wait_spot->pos);
         printf(" to ");
         print_pos(opt->pos);
 

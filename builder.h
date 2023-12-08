@@ -12,7 +12,16 @@
                                                         \
     int count = sizeof(positions) / sizeof(position_t); \
                                                         \
-    build_road(data, positions, count, DIR);            \
+    build_road(data, positions, count, DIR, false);     \
+  } while (0);
+
+#define BUILD_EXIT_ROAD(DATA, POSITIONS, DIR)           \
+  do {                                                  \
+    position_t positions[] = POSITIONS;                 \
+                                                        \
+    int count = sizeof(positions) / sizeof(position_t); \
+                                                        \
+    build_road(data, positions, count, DIR, true);      \
   } while (0);
 
 #define BUILD_INTER(DATA, POSITIONS, WAIT_SPOTS, OPTIONS)                   \
@@ -62,7 +71,9 @@ typedef enum {
   ROAD_DIR,
   MULTI_INTER,
   PARKING_LOT,
-  
+
+  LEAVE_NAV,
+
   MAP_COUNT,
 } map_e;
 

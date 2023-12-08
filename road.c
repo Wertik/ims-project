@@ -5,6 +5,7 @@ road_t* create_road() {
   MERROR(road);
 
   road->parts = NULL;
+  road->has_exit = false;
   road->part_count = 0;
 
   return road;
@@ -60,14 +61,14 @@ void free_road_list(road_list_t* list) {
   free(list);
 }
 
-road_t *get_road(road_list_t *list, entity_t *target) {
+road_t* get_road(road_list_t* list, position_t pos) {
   for (int i = 0; i < list->size; i++) {
-    road_t *road = list->roads[i];
+    road_t* road = list->roads[i];
 
     for (int j = 0; j < road->part_count; j++) {
-      entity_t *e = (entity_t*)road->parts[j];
+      entity_t* e = (entity_t*)road->parts[j];
 
-      if (e == target) {
+      if (cmp_pos(e->pos, pos) == true) {
         return road;
       }
     }

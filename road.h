@@ -11,6 +11,8 @@ typedef struct {
   // parts, entities that make up the road
   e_road_t **parts;
   int part_count;
+
+  bool has_exit;
 } road_t;
 
 typedef struct {
@@ -30,4 +32,4 @@ void add_part(road_t *road, e_road_t *part);
 
 void free_road(road_t *road);
 
-road_t *get_road(road_list_t *list, entity_t *target);
+road_t *get_road(road_list_t *list, position_t pos);
