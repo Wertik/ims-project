@@ -16,7 +16,7 @@
 
 #define IS_ENV(NAME)       \
   (getenv(NAME) != NULL && \
-   (strcmp(getenv(NAME), "1") != 0 || strcmp(getenv(NAME), "true") != 0))
+   (strcmp(getenv(NAME), "1") == 0 || strcmp(getenv(NAME), "true") == 0))
 
 // if threre are no vargs, no ',' gets added
 // https://gcc.gnu.org/onlinedocs/cpp/Concatenation.html
