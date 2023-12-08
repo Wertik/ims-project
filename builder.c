@@ -52,16 +52,6 @@ void build_intersection(simulation_data_t *data, position_t parts[],
   add_inter(data->intersections, inter);
 }
 
-void generate_cars(simulation_data_t *data) {
-  position_t starting_positions[] = {{5, 3}, {26, 27}};
-  int number_of_cars = 1;
-
-  for (int i = 0; i < number_of_cars; ++i) {
-    create_entities(data->entities, (position_t[]){starting_positions[i]}, 1,
-                    creator_car);
-  }
-}
-
 void build_map(simulation_data_t *data, map_e map) {
   printf("Building map %d...\n", map);
 
@@ -87,10 +77,8 @@ void build_map(simulation_data_t *data, map_e map) {
       map_exit->type = MAP_EXIT;
       add_entity(data->entities, map_exit);
 
-      // spawn a car
-      car_t *car = create_car((position_t){5, 10});
-      car->leaving = true;
-      add_entity(data->entities, (entity_t *)car);
+      // add a generator
+      ADD_GENERATOR(data, ARR({5, 10}), 4, -1);
       break;
     }
     case MULTI_INTER:
@@ -124,18 +112,16 @@ void build_map(simulation_data_t *data, map_e map) {
       break;
     case PARKING_LOT: {
       // -- build extended vertical roads for car entrances
-      position_t road_positions[] = {
-          {5, 3},  {5, 4},  {5, 5},  {5, 6},  {5, 7},  {5, 8},  {5, 9},
-          {5, 11}, {5, 13}, {5, 15},
-          {5, 17}, {5, 19}};
+      position_t road_positions[] = {{5, 3},  {5, 4},  {5, 5},  {5, 6},
+                                     {5, 7},  {5, 8},  {5, 9},  {5, 11},
+                                     {5, 13}, {5, 15}, {5, 17}, {5, 19}};
 
       int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
 
       build_road(data, road_positions, num_positions, DIR_DOWN, false);
 
-      build_road(data,
-                 (position_t[]){{5, 21}, {5, 22}, {5, 23}},
-                 3, DIR_DOWN, true);
+      build_road(data, (position_t[]){{5, 21}, {5, 22}, {5, 23}}, 3, DIR_DOWN,
+                 true);
 
       build_road(data,
                  (position_t[]){{26, 10},
@@ -158,28 +144,15 @@ void build_map(simulation_data_t *data, map_e map) {
       for (int row = 0; row < 6; ++row) {
         int y_offset = 10 + (row * 2);
         direction_e dir = (row == 5) ? DIR_RIGHT : DIR_LEFT;
-        build_road(data,
-                   (position_t[]){{6, y_offset},
-                                  {7, y_offset},
-                                  {8, y_offset},
-                                  {9, y_offset},
-                                  {10, y_offset},
-                                  {11, y_offset},
-                                  {12, y_offset},
-                                  {13, y_offset},
-                                  {14, y_offset},
-                                  {15, y_offset},
-                                  {16, y_offset},
-                                  {17, y_offset},
-                                  {18, y_offset},
-                                  {19, y_offset},
-                                  {20, y_offset},
-                                  {21, y_offset},
-                                  {22, y_offset},
-                                  {23, y_offset},
-                                  {24, y_offset},
-                                  {25, y_offset}},
-                   20, dir, false);
+        build_road(
+            data,
+            (position_t[]){
+                {6, y_offset},  {7, y_offset},  {8, y_offset},  {9, y_offset},
+                {10, y_offset}, {11, y_offset}, {12, y_offset}, {13, y_offset},
+                {14, y_offset}, {15, y_offset}, {16, y_offset}, {17, y_offset},
+                {18, y_offset}, {19, y_offset}, {20, y_offset}, {21, y_offset},
+                {22, y_offset}, {23, y_offset}, {24, y_offset}, {25, y_offset}},
+            20, dir, false);
       }
 
       // cars starting position
@@ -203,11 +176,10 @@ void build_map(simulation_data_t *data, map_e map) {
                        {.pos = {25, 20}, .dir = DIR_LEFT}}),
                   ARR({{.pos = {26, 19}, .dir = DIR_UP}}));
 
-
-      for (int row = 10; row <20; row+=2) {
-        BUILD_INTER(data, ARR({{5, row}}), ARR({{{5, row - 1}, DIR_UP}, {{6, row}, DIR_RIGHT}}),
+      for (int row = 10; row < 20; row += 2) {
+        BUILD_INTER(data, ARR({{5, row}}),
+                    ARR({{{5, row - 1}, DIR_UP}, {{6, row}, DIR_RIGHT}}),
                     ARR({{{5, row + 1}, DIR_DOWN}}));
-
       }
 
       BUILD_INTER(data, ARR({{5, 20}}), ARR({{{5, 19}, DIR_UP}}),
@@ -233,6 +205,9 @@ void build_map(simulation_data_t *data, map_e map) {
       e_road_t *top_right =
           (e_road_t *)get_entity(data->entities, (position_t){26, 10});
       top_right->direction = DIR_LEFT;
+
+      ADD_GENERATOR(data, ARR({5, 3}), 2, 100);
+      ADD_GENERATOR(data, ARR({26, 27}), 2, 100);
       break;
     }
 
@@ -244,9 +219,11 @@ void build_map(simulation_data_t *data, map_e map) {
       build_road(data, (position_t[]){{9, 10}, {10, 10}, {11, 10}}, 3,
                  DIR_RIGHT, false);
 
-      build_road(data, (position_t[]){{12, 11}, {12, 12}, {12, 13}}, 3, DIR_UP, false);
+      build_road(data, (position_t[]){{12, 11}, {12, 12}, {12, 13}}, 3, DIR_UP,
+                 false);
 
-      build_road(data, (position_t[]){{12, 9}, {12, 8}, {12, 7}}, 3, DIR_UP, false);
+      build_road(data, (position_t[]){{12, 9}, {12, 8}, {12, 7}}, 3, DIR_UP,
+                 false);
 
       build_road(data, (position_t[]){{13, 10}, {14, 10}, {15, 10}}, 3,
                  DIR_LEFT, false);

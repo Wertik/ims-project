@@ -1,5 +1,24 @@
 #include "car.h"
 
+void run_generators(simulation_data_t *data) {
+  for (int i = 0; i < data->generators->size; i++) {
+    generator_t *gen = data->generators->data[i];
+    run_generator(data, gen);
+  }
+}
+
+void run_generator(simulation_data_t *data, generator_t *gen) {
+  if (data->tick % gen->interval == 0 &&
+      (gen->gen_count < gen->count || gen->count == -1)) {
+    gen->gen_count += 1;
+
+    car_t *car = create_car(gen->pos);
+    add_entity(data->entities, (entity_t *)car);
+
+    printf("generated a car on %d;%d\n", gen->pos.x, gen->pos.y);
+  }
+}
+
 void run_inters(simulation_data_t *data) {
   inter_list_t *inters = data->intersections;
 

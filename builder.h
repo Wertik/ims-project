@@ -54,6 +54,13 @@
     create_entities(data->entities, positions, count, creator_car); \
   } while (0);
 
+#define ADD_GENERATOR(DATA, POSITION, INTERVAL, COUNT)         \
+  do {                                                         \
+    position_t pos = (position_t)POSITION;                     \
+    generator_t *generator = create_gen(pos, INTERVAL, COUNT); \
+    add_generator(data->generators, generator);                \
+  } while (0);
+
 // To pass an array literal as an argument for macros
 // https://stackoverflow.com/a/5504336/20205862
 #define ARR(...) __VA_ARGS__

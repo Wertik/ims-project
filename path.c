@@ -14,6 +14,8 @@ extern char *optarg;
 extern int optind, opterr, optopt;
 
 bool run(simulation_data_t *data) {
+  run_generators(data);
+
   run_inters(data);
   return run_cars(data);
 }
@@ -65,6 +67,7 @@ int main(int argc, char *argv[]) {
   simulation_data_t data = {.roads = create_road_list(),
                             .entities = create_entity_list(),
                             .intersections = create_inter_list(),
+                            .generators = create_gen_list(),
                             .tick = 0};
 
   build_map(&data, map);
@@ -119,10 +122,6 @@ int main(int argc, char *argv[]) {
 
     printf("--- Tick #%d\n", data.tick);
 
-    if (map == PARKING_LOT && data.tick % 2 == 0 && data.tick <= 200) {
-      generate_cars(&data);
-    }
-
     bool should_quit = !run(&data);
     draw(renderer, &data);
 
@@ -149,6 +148,8 @@ int main(int argc, char *argv[]) {
 
   free_entity_list(data.entities);
   free_road_list(data.roads);
+  free_inter_list(data.intersections);
+  free_gen_list(data.generators);
 
   close_SDL(window, renderer);
   return 0;

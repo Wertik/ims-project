@@ -6,6 +6,9 @@
 
 // car navigation logic
 
+void run_generators(simulation_data_t *data);
+void run_generator(simulation_data_t *data, generator_t *gen);
+
 void run_inters(simulation_data_t *data);
 void run_inter(simulation_data_t *data, inter_t *inter);
 
