@@ -5,7 +5,7 @@
 #define ASSERT_EQ(REAL, EXPECTED)                     \
   do {                                                \
     if ((REAL) != (EXPECTED)) {                       \
-      printf("Assert L#%d didn't pass.\n", __LINE__); \
+      VERBOSE("Assert L#%d didn't pass.\n", __LINE__); \
       exit(EXIT_FAILURE);                             \
     }                                                 \
   } while (0);
@@ -13,7 +13,7 @@
 #define ASSERT_NEQ(REAL, EXPECTED)                    \
   do {                                                \
     if ((REAL) == (EXPECTED)) {                       \
-      printf("Assert L#%d didn't pass.\n", __LINE__); \
+      VERBOSE("Assert L#%d didn't pass.\n", __LINE__); \
       exit(EXIT_FAILURE);                             \
     }                                                 \
   } while (0);
@@ -121,6 +121,6 @@ int main() {
     free_car_list(list);
   }
 
-  printf("Tests ran successfully.\n");
+  VERBOSE("Tests ran successfully.\n");
   return EXIT_SUCCESS;
 }

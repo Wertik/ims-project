@@ -78,9 +78,9 @@ road_t* get_road(road_list_t* list, position_t pos) {
 }
 
 void print_road(road_t *road, bool nl) {
-  printf("road, has_exit=%s, part_count=%d", BTS(road->has_exit), road->part_count);
+  VERBOSE("road, has_exit=%s, part_count=%d", BTS(road->has_exit), road->part_count);
 
   if (nl == true) {
-    printf("\n");
+    VERBOSE("\n");
   }
 }

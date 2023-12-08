@@ -10,7 +10,7 @@ cord_t bounds(cord_t a, cord_t b_min, cord_t b_max) {
 
 bool cmp_pos(position_t a, position_t b) { return a.x == b.x && a.y == b.y; }
 
-void print_pos(position_t pos) { printf("[%d;%d]\n", pos.x, pos.y); }
+void print_pos(position_t pos) { VERBOSE("[%d;%d]\n", pos.x, pos.y); }
 
 direction_e *get_nav_x(int delta_x, direction_e *res, int *count) {
   for (int x = 0; x < abs(delta_x); x += 1) {
@@ -67,7 +67,7 @@ direction_e inverse_dir(direction_e dir) {
     case DIR_LEFT:
       return DIR_RIGHT;
     case DIR_COUNT:
-      printf("inverse_dir: invalid direction index.\n");
+      fprintf(stderr, "inverse_dir: invalid direction index.\n");
       exit(EXIT_FAILURE);
   }
   // should never occur
@@ -89,7 +89,7 @@ position_t add_dir(position_t pos, direction_e direction) {
       pos.x += -1;
       break;
     case DIR_COUNT:
-      printf("Invalid direction index.\n");
+      fprintf(stderr, "Invalid direction index.\n");
       exit(EXIT_FAILURE);
   }
   return pos;
@@ -112,7 +112,7 @@ position_t set_dir(position_t pos, direction_e direction) {
       pos.x = -1;
       break;
     case DIR_COUNT:
-      printf("Invalid direction index.\n");
+      fprintf(stderr, "Invalid direction index.\n");
       exit(EXIT_FAILURE);
   }
   return pos;

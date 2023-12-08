@@ -11,8 +11,8 @@ void run_generator(simulation_data_t *data, generator_t *gen) {
   if (data->tick % gen->interval == 0 &&
       (gen->gen_count < gen->count || gen->count == -1)) {
     if (get_car(data->cars, gen->pos) != NULL) {
-      printf("cannot generate on [%d;%d], spot occupied.\n", gen->pos.x,
-             gen->pos.y);
+      VERBOSE("cannot generate on [%d;%d], spot occupied.\n", gen->pos.x,
+              gen->pos.y);
       return;
     }
 
@@ -22,8 +22,8 @@ void run_generator(simulation_data_t *data, generator_t *gen) {
     car->spawned_at = data->tick;
     add_car(data->cars, car);
 
-    printf("Generated a car on [%d;%d] at %d\n", car->pos.x, car->pos.y,
-           data->tick);
+    VERBOSE("Generated a car on [%d;%d] at %d\n", car->pos.x, car->pos.y,
+            data->tick);
   }
 }
 
@@ -79,18 +79,18 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
     right_car = inter->wait_cars[(dir + 1 + DIR_COUNT) % DIR_COUNT];
     opposite_car = inter->wait_cars[(dir + 2) % DIR_COUNT];  // Car opposite
 
-    printf("Car %d position: %d, %d\n", dir, car->pos.x, car->pos.y);
+    VERBOSE("Car %d position: %d, %d\n", dir, car->pos.x, car->pos.y);
 
     if (right_car != NULL) {
       car->waiting = true;
-      printf("car %d is waiting for car %d to go\n", dir,
-             (dir + 1 + DIR_COUNT) % DIR_COUNT);
+      VERBOSE("car %d is waiting for car %d to go\n", dir,
+              (dir + 1 + DIR_COUNT) % DIR_COUNT);
     } else if (opposite_car != NULL && (car->pos.x < opposite_car->pos.x ||
                                         car->pos.y < opposite_car->pos.y)) {
       car->waiting = true;
-      printf("car %d is waiting for the opposite car to go\n", dir);
+      VERBOSE("car %d is waiting for the opposite car to go\n", dir);
     } else {
-      printf("car %d is not waiting\n", dir);
+      VERBOSE("car %d is not waiting\n", dir);
       car->waiting = false;
     }
   }
@@ -108,7 +108,7 @@ void run_inter(simulation_data_t *data, inter_t *inter) {
     // Cars that are not in a waiting state
     inter->occupied = true;
     rem_car_wait_spot(inter, dir);
-    printf("car picked direction %d to go\n", dir);
+    VERBOSE("car picked direction %d to go\n", dir);
     car->waiting = false;
   }
 }
@@ -121,7 +121,7 @@ bool run_cars(simulation_data_t *data) {
   for (int i = 0; i < list->size;) {
     car_t *car = list->data[i];
 
-    printf("- ");
+    VERBOSE("- ");
     print_car(car, true);
 
     // no need to do anything when the car already left
@@ -160,8 +160,8 @@ bool run_cars(simulation_data_t *data) {
         if (car->pos.x == x && car->pos.y == y) {
           if (found == true) {
             data->paused = true;
-            printf("Multiple cars on the same spot (%d;%d). Pausing...\n", x,
-                   y);
+            VERBOSE("Multiple cars on the same spot (%d;%d). Pausing...\n", x,
+                    y);
             // break out of all the loops
             goto end;
           } else {
@@ -182,7 +182,7 @@ void run_car(simulation_data_t *data, car_t *car) {
     if (data->tick >= car->parked_at + CAR_PARKED_TICKS) {
       car->leaving = true;
       car->parked = false;
-      printf("leaving the parking lot.\n");
+      VERBOSE("leaving the parking lot.\n");
     }
     return;
   }
@@ -209,7 +209,7 @@ void run_car(simulation_data_t *data, car_t *car) {
     if (get_car(data->cars, target) != NULL) {
       print_car(car, false);
       car->speed = (position_t){0, 0};
-      printf("cannot follow steps - would lead to collision, waiting.\n");
+      VERBOSE("cannot follow steps - would lead to collision, waiting.\n");
       return;
     }
 
@@ -218,7 +218,7 @@ void run_car(simulation_data_t *data, car_t *car) {
       inter_t *inter = get_inter(data->intersections, car->pos);
 
       if (inter != NULL) {
-        printf("set intersection to un-occupied\n");
+        VERBOSE("set intersection to un-occupied\n");
         inter->occupied = false;
       }
     }
@@ -255,14 +255,14 @@ void run_car(simulation_data_t *data, car_t *car) {
         }
 
         print_car(car, false);
-        printf("found a parking lot.\n");
+        VERBOSE("found a parking lot.\n");
         chosen_dir = dir;
         break;
       }
 
       if (entity->type == MAP_EXIT) {
         chosen_dir = dir;
-        printf("found exit.\n");
+        VERBOSE("found exit.\n");
         break;
       }
 
@@ -278,8 +278,8 @@ void run_car(simulation_data_t *data, car_t *car) {
         if (road->direction != DIR_COUNT) {
           if (road->direction == inverse_dir(dir)) {
             // not an option
-            printf("path option [%d;%d] not allowed dir.\n", road->pos.x,
-                   road->pos.y);
+            VERBOSE("path option [%d;%d] not allowed dir.\n", road->pos.x,
+                    road->pos.y);
             continue;
           }
         }
@@ -287,7 +287,7 @@ void run_car(simulation_data_t *data, car_t *car) {
         path_options[path_option_count] = dir;
         path_option_count += 1;
 
-        printf("found path option ");
+        VERBOSE("found path option ");
         print_pos(entity->pos);
       }
       continue;
@@ -347,7 +347,7 @@ void run_car(simulation_data_t *data, car_t *car) {
 
   if (chosen_dir == DIR_COUNT) {
     print_car(car, false);
-    printf("failed to choose direction\n");
+    VERBOSE("failed to choose direction\n");
     car->speed = (position_t){0, 0};
 
     free(around);
@@ -355,7 +355,7 @@ void run_car(simulation_data_t *data, car_t *car) {
   }
 
   print_car(car, false);
-  printf("chose path to ");
+  VERBOSE("chose path to ");
   print_pos(add_dir(car->pos, chosen_dir));
 
   car->speed = set_dir(car->speed, chosen_dir);
@@ -374,7 +374,7 @@ void run_car(simulation_data_t *data, car_t *car) {
     car->waiting = true;
 
     add_car_wait_spot(inter, inter_dir, car);
-    printf("waiting on intersection, coming from %d\n", inter_dir);
+    VERBOSE("waiting on intersection, coming from %d\n", inter_dir);
 
     int count = 0;
     for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
@@ -386,7 +386,7 @@ void run_car(simulation_data_t *data, car_t *car) {
     }
 
     if (count == 0) {
-      printf("no intersection exit to chose from\n");
+      fprintf(stderr, "no intersection exit to chose from\n");
       exit(EXIT_FAILURE);
     }
 
@@ -424,9 +424,9 @@ void run_car(simulation_data_t *data, car_t *car) {
         choose_road = (rand() % (count + 1)) >= 1;
       }
 
-      printf("inter exit at [%d;%d] road=%s has_exit=%s chosen=%s\n",
-             opt->pos.x, opt->pos.y, BTS(road != NULL),
-             BTS(road != NULL && road->has_exit == true), BTS(choose_road));
+      VERBOSE("inter exit at [%d;%d] road=%s has_exit=%s chosen=%s\n",
+              opt->pos.x, opt->pos.y, BTS(road != NULL),
+              BTS(road != NULL && road->has_exit == true), BTS(choose_road));
 
       if (choose_road == true) {
         // navigate the car through the intersection
@@ -436,24 +436,25 @@ void run_car(simulation_data_t *data, car_t *car) {
             get_nav(wait_spot->pos, opt->pos,
                     inter_dir == DIR_DOWN || inter_dir == DIR_UP, &nav_count);
 
-        printf("navigate from ");
+        VERBOSE("navigate from ");
         print_pos(wait_spot->pos);
-        printf("to ");
+        VERBOSE("to ");
         print_pos(opt->pos);
 
         if (nav == NULL) {
-          printf("run_car: invalid navigation through intersection.\n");
+          fprintf(stderr,
+                  "run_car: invalid navigation through intersection.\n");
           exit(EXIT_FAILURE);
         }
 
         // add steps based on the direction
         add_nav_steps(car, nav, nav_count);
 
-        printf("got navigation steps\n");
+        VERBOSE("got navigation steps\n");
 
         // print steps
         for (int i = 0; i < nav_count; i++) {
-          printf("- %d\n", nav[i]);
+          VERBOSE("- %d\n", nav[i]);
         }
 
         free(nav);
@@ -482,7 +483,7 @@ void move_car(simulation_data_t *data, car_t *car) {
   // nothing there, cannot move to void
   if (dst == NULL) {
     print_car(car, false);
-    printf("cannot move forward, no road ahead.\n");
+    VERBOSE("cannot move forward, no road ahead.\n");
     return;
   }
 
@@ -493,7 +494,7 @@ void move_car(simulation_data_t *data, car_t *car) {
     car->pos.y = new_y;
 
     print_car(car, false);
-    printf("moved forward.\n");
+    VERBOSE("moved forward.\n");
     return;
   }
 
@@ -509,7 +510,7 @@ void move_car(simulation_data_t *data, car_t *car) {
     car->speed.y = 0;
 
     print_car(car, false);
-    printf("left the map.\n");
+    VERBOSE("left the map.\n");
 
     car->left_at = data->tick;
 
@@ -531,11 +532,11 @@ void move_car(simulation_data_t *data, car_t *car) {
     car->speed.y = 0;
 
     print_car(car, false);
-    printf("reached a parking spot.\n");
+    VERBOSE("reached a parking spot.\n");
     return;
   }
 
   print_car(car, false);
-  printf("cannot move forward, blocked.\n");
+  VERBOSE("cannot move forward, blocked.\n");
   return;
 }

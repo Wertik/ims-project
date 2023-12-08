@@ -53,7 +53,7 @@ void build_intersection(simulation_data_t *data, position_t parts[],
 }
 
 void build_map(simulation_data_t *data, map_e map) {
-  printf("Building map %d...\n", map);
+  VERBOSE("Building map %d...\n", map);
 
   switch (map) {
     case LEAVE_NAV: {
@@ -282,7 +282,7 @@ void build_map(simulation_data_t *data, map_e map) {
       ADD_CARS(data, ARR({{9, 10}}));
       break;
     default:
-      printf("build_map: Invalid map chosen.\n");
+      fprintf(stderr, "build_map: Invalid map chosen.\n");
       exit(EXIT_FAILURE);
   }
 }

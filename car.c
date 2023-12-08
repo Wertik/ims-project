@@ -29,15 +29,15 @@ car_t *create_car(position_t pos) {
 }
 
 void print_car(car_t *car, bool nl) {
-  printf(
+  VERBOSE(
       "car @ [%d;%d]: speed=[%d;%d], parked=%s, waiting=%s, leaving=%s, "
       "left=%s, spawned_at=%d, parked_at=%d",
       car->pos.x, car->pos.y, car->speed.x, car->speed.y, BTS(car->parked),
       BTS(car->waiting), BTS(car->leaving), BTS(car->left), car->spawned_at, car->parked_at);
   if (nl) {
-    printf("\n");
+    VERBOSE("\n");
   } else {
-    printf(": ");
+    VERBOSE(": ");
   }
 }
 

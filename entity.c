@@ -92,7 +92,7 @@ entity_t **get_surroundings(entity_list_t *list, position_t pos) {
 
 void del_entity(entity_list_t *list, unsigned int idx) {
   if (idx >= list->size) {
-    printf("del_entity: invalid index %d\n", idx);
+    fprintf(stderr, "del_entity: invalid index %d\n", idx);
     exit(EXIT_FAILURE);
   }
 
@@ -159,18 +159,18 @@ void print_entity(entity_t *e, bool nl) {
       print_road_e((e_road_t *)e, nl);
       break;
     default:
-      printf("entity %s @ [%d;%d]", pretty_type(e->type), e->pos.x, e->pos.y);
+      VERBOSE("entity %s @ [%d;%d]", pretty_type(e->type), e->pos.x, e->pos.y);
       break;
   }
 }
 
 void print_road_e(e_road_t *road, bool nl) {
-  printf("empty road @ [%d;%d]", road->pos.x, road->pos.y);
+  VERBOSE("empty road @ [%d;%d]", road->pos.x, road->pos.y);
 
   if (nl == true) {
-    printf("\n");
+    VERBOSE("\n");
   } else {
-    printf(": ");
+    VERBOSE(": ");
   }
 }
 

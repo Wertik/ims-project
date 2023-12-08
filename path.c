@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
       if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
         // -- print information about cars
 
-        printf("-- Cars (%d)\n", data.cars->size);
+        VERBOSE("-- Cars (%d)\n", data.cars->size);
         for (int i = 0; i < data.cars->size; i++) {
           print_car(data.cars->data[i], true);
         }
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
         unsigned int pos_x = x / CELL_SIZE;
         unsigned int pos_y = y / CELL_SIZE;
 
-        printf("Clicked at [%d;%d]\n", pos_x, pos_y);
+        VERBOSE("Clicked at [%d;%d]\n", pos_x, pos_y);
 
         // Print all the entities on this location
 
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    printf("--- Tick #%d\n", data.tick);
+    VERBOSE("--- Tick #%d\n", data.tick);
 
     bool should_quit = !run(&data);
     draw(renderer, &data);
@@ -175,13 +175,13 @@ int main(int argc, char *argv[]) {
     // Zpoždění pro lepší pozorování
     SDL_Delay(sim_speed);
 
-    printf("---\n");
+    VERBOSE("---\n");
     data.tick += 1;
 
     // run for at least 4 ticks
     // - wait for car generators
     if (quit || (should_quit && data.tick > 4)) {
-      printf("Stopping...\n");
+      VERBOSE("Stopping...\n");
       // Pauza pro zobrazení výsledků
       SDL_Delay(1000);
       quit = true;
