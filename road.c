@@ -61,6 +61,7 @@ void free_road_list(road_list_t* list) {
   free(list);
 }
 
+// get road by parts
 road_t* get_road(road_list_t* list, position_t pos) {
   for (int i = 0; i < list->size; i++) {
     road_t* road = list->roads[i];
@@ -74,4 +75,12 @@ road_t* get_road(road_list_t* list, position_t pos) {
     }
   }
   return NULL;
+}
+
+void print_road(road_t *road, bool nl) {
+  printf("road, has_exit=%s, part_count=%d", BTS(road->has_exit), road->part_count);
+
+  if (nl == true) {
+    printf("\n");
+  }
 }

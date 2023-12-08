@@ -193,6 +193,11 @@ void run_car(simulation_data_t *data, car_t *car) {
     return;
   }
 
+  direction_e chosen_dir = DIR_COUNT;
+
+  // possible paths around the car
+  entity_t **around = get_surroundings(data->entities, car->pos);
+
   // car has specific directions to take
   // move by those
   if (car->nav_count != 0) {
@@ -219,128 +224,122 @@ void run_car(simulation_data_t *data, car_t *car) {
     }
 
     pop_nav_step(car);
-    car->speed = set_dir(car->speed, dir);
-    print_car(car, false);
-    printf("following steps\n");
-    return;
+    chosen_dir = dir;
   }
 
   // "path finding"
 
-  // possible paths around the car
-  entity_t **around = get_surroundings(data->entities, car->pos);
+  if (chosen_dir == DIR_COUNT) {
+    direction_e path_options[DIR_COUNT] = {DIR_COUNT};
+    int path_option_count = 0;
 
-  direction_e path_options[DIR_COUNT] = {DIR_COUNT};
-  int path_option_count = 0;
+    for (direction_e dir = 0; dir < DIR_COUNT; dir++) {
+      entity_t *entity = around[dir];
 
-  direction_e chosen_dir = DIR_COUNT;
-
-  for (direction_e dir = 0; dir < DIR_COUNT; dir++) {
-    entity_t *entity = around[dir];
-
-    if (entity == NULL) {
-      continue;
-    }
-
-    // position occupied by another car, don't consider this path
-    if (get_car(data->cars, entity->pos) != NULL) {
-      continue;
-    }
-
-    // prio parking lots
-    // - only head into it if it's empty
-    if (entity->type == PARKING) {
-      // if we're already leaving, we're not interested in parking spots
-      // if it's already occupied, don't consider this spot
-      if (car->leaving == true) {
+      if (entity == NULL) {
         continue;
       }
 
-      print_car(car, false);
-      printf("found a parking lot.\n");
-      chosen_dir = dir;
-      break;
-    }
-
-    if (entity->type == MAP_EXIT) {
-      chosen_dir = dir;
-      printf("found exit.\n");
-      break;
-    }
-
-    // found an empty road leading from this
-    // add to options
-    if (entity->type == EMPTY_ROAD) {
-      // if the road part has a set direction, check for it
-      // if the direction is ok for us (aka not directly inverse to the one we
-      // wanna try and head in), add to path options
-
-      e_road_t *road = (e_road_t *)entity;
-
-      if (road->direction != DIR_COUNT) {
-        if (road->direction == inverse_dir(dir)) {
-          // not an option
-          printf("path option [%d;%d] not allowed dir.\n", road->pos.x,
-                 road->pos.y);
-          continue;
-        }
+      // position occupied by another car, don't consider this path
+      if (get_car(data->cars, entity->pos) != NULL) {
+        continue;
       }
 
-      path_options[path_option_count] = dir;
-      path_option_count += 1;
+      // prio parking lots
+      // - only head into it if it's empty
+      if (entity->type == PARKING) {
+        // if we're already leaving, we're not interested in parking spots
+        // if it's already occupied, don't consider this spot
+        if (car->leaving == true) {
+          continue;
+        }
 
-      printf("found path option ");
-      print_pos(entity->pos);
+        print_car(car, false);
+        printf("found a parking lot.\n");
+        chosen_dir = dir;
+        break;
+      }
+
+      if (entity->type == MAP_EXIT) {
+        chosen_dir = dir;
+        printf("found exit.\n");
+        break;
+      }
+
+      // found an empty road leading from this
+      // add to options
+      if (entity->type == EMPTY_ROAD) {
+        // if the road part has a set direction, check for it
+        // if the direction is ok for us (aka not directly inverse to the one we
+        // wanna try and head in), add to path options
+
+        e_road_t *road = (e_road_t *)entity;
+
+        if (road->direction != DIR_COUNT) {
+          if (road->direction == inverse_dir(dir)) {
+            // not an option
+            printf("path option [%d;%d] not allowed dir.\n", road->pos.x,
+                   road->pos.y);
+            continue;
+          }
+        }
+
+        path_options[path_option_count] = dir;
+        path_option_count += 1;
+
+        printf("found path option ");
+        print_pos(entity->pos);
+      }
+      continue;
     }
-    continue;
-  }
 
-  // not decided yet, pick from the options
-  if (chosen_dir == DIR_COUNT) {
-    // go through the directions, pick randomly (even distr for now)
-    if (path_option_count > 1) {
-      // should be current piece of road
-      entity_t *curr_e = get_entity(data->entities, car->pos);
-      e_road_t *curr_road = (e_road_t *)curr_e;
+    // not decided yet, pick from the options
+    if (chosen_dir == DIR_COUNT) {
+      // go through the directions, pick randomly (even distr for now)
+      if (path_option_count > 1) {
+        // should be current piece of road
+        entity_t *curr_e = get_entity(data->entities, car->pos);
+        e_road_t *curr_road = (e_road_t *)curr_e;
 
-      if (curr_e->type == EMPTY_ROAD && curr_road->direction != DIR_COUNT) {
-        chosen_dir = curr_road->direction;
+        if (curr_e->type == EMPTY_ROAD && curr_road->direction != DIR_COUNT) {
+          chosen_dir = curr_road->direction;
+        } else {
+          direction_e last = DIR_COUNT;
+
+          for (int i = 0; i < path_option_count; i++) {
+            direction_e option = path_options[i];
+
+            if (option == DIR_COUNT) {
+              continue;
+            }
+
+            // don't take the same path back
+            if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
+              continue;
+            }
+
+            last = option;
+
+            if ((rand() % (path_option_count + 1)) > 1) {
+              chosen_dir = option;
+              break;
+            }
+          }
+
+          // failed to choose, use the last possible option
+          if (chosen_dir == DIR_COUNT) {
+            chosen_dir = last;
+          }
+        }
       } else {
-        direction_e last = DIR_COUNT;
+        // use the only path option
+        for (int j = 0; j < path_option_count; j++) {
+          direction_e option = path_options[j];
 
-        for (int i = 0; i < path_option_count; i++) {
-          direction_e option = path_options[i];
-
-          if (option == DIR_COUNT) {
-            continue;
-          }
-
-          // don't take the same path back
-          if (cmp_pos(add_dir(car->pos, option), car->p_pos)) {
-            continue;
-          }
-
-          last = option;
-
-          if ((rand() % (path_option_count + 1)) > 1) {
+          if (option != DIR_COUNT) {
             chosen_dir = option;
             break;
           }
-        }
-
-        // failed to choose, use the last possible option
-        if (chosen_dir == DIR_COUNT) {
-          chosen_dir = last;
-        }
-      }
-    } else {
-      // use the only path option
-      for (int j = 0; j < path_option_count; j++) {
-        direction_e option = path_options[j];
-
-        if (option != DIR_COUNT) {
-          chosen_dir = option;
-          break;
         }
       }
     }
@@ -425,6 +424,10 @@ void run_car(simulation_data_t *data, car_t *car) {
         choose_road = (rand() % (count + 1)) >= 1;
       }
 
+      printf("inter exit at [%d;%d] road=%s has_exit=%s chosen=%s\n",
+             opt->pos.x, opt->pos.y, BTS(road != NULL),
+             BTS(road != NULL && road->has_exit == true), BTS(choose_road));
+
       if (choose_road == true) {
         // navigate the car through the intersection
 
@@ -435,7 +438,7 @@ void run_car(simulation_data_t *data, car_t *car) {
 
         printf("navigate from ");
         print_pos(wait_spot->pos);
-        printf(" to ");
+        printf("to ");
         print_pos(opt->pos);
 
         if (nav == NULL) {

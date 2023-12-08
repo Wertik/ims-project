@@ -33,3 +33,5 @@ void add_part(road_t *road, e_road_t *part);
 void free_road(road_t *road);
 
 road_t *get_road(road_list_t *list, position_t pos);
+
+void print_road(road_t *road, bool nl);

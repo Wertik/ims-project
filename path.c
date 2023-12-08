@@ -149,6 +149,15 @@ int main(int argc, char *argv[]) {
             print_car(car, true);
           }
         }
+
+        // print road info
+        // assume they don't overlap
+
+        road_t *road = get_road(data.roads, (position_t){pos_x, pos_y});
+
+        if (road != NULL) {
+          print_road(road, true);
+        }
       }
     }
 
