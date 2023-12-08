@@ -114,6 +114,19 @@ int main(int argc, char *argv[]) {
           }
         }
       }
+
+      // left click prints the location of the cell
+      if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+        int x = e.button.x;
+        int y = e.button.y;
+
+        // get the cell coordinates
+
+        int pos_x = x / CELL_SIZE;
+        int pos_y = y / CELL_SIZE;
+
+        printf("Clicked at [%d;%d]\n", pos_x, pos_y);
+      }
     }
 
     if (paused) {
