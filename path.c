@@ -32,14 +32,17 @@ int main(int argc, char *argv[]) {
 
   map_e map = SINGLE_INTER;
 
-  while ((opt = getopt(argc, argv, "phm:")) != -1) {
+  int sim_speed = 400;
+
+  while ((opt = getopt(argc, argv, "phm:s:")) != -1) {
     switch (opt) {
       case 'h':
         printf(
-            "Usage: ./path [-h] [-p] [-m MAP]\n\n-h get help\n-p start the "
-            "simulation "
-            "paused\n-m MAP id of map to use for the simulation (enum "
-            "map_e)\n");
+            "Usage: ./path [-h] [-p] [-m MAP] [-s SPEED]\n\n"
+            "-h get help\n"
+            "-p start the simulation paused\n"
+            "-m MAP id of map to use for the simulation (enum map_e)\n"
+            "-s SPEED time in ms to wait each tick\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
@@ -48,6 +51,15 @@ int main(int argc, char *argv[]) {
           return EXIT_FAILURE;
         }
         map = m;
+        break;
+      }
+      case 's': {
+        int s = atoi(optarg);
+        if (s <= 0) {
+          printf("cannot go under 1ms a tick.");
+          return EXIT_FAILURE;
+        }
+        sim_speed = s;
         break;
       }
       case 'p':
@@ -142,11 +154,7 @@ int main(int argc, char *argv[]) {
     draw(renderer, &data);
 
     // Zpoždění pro lepší pozorování
-    if (map == PARKING_LOT) {
-      SDL_Delay(100);
-    } else {
-      SDL_Delay(400);
-    }
+    SDL_Delay(sim_speed);
 
     printf("---\n");
     data.tick += 1;
