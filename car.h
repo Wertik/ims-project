@@ -31,6 +31,8 @@ typedef struct {
 
   // car is finished with the simulation
   bool left;
+  // when did the car leave
+  int left_at;
 
   // navigation through the whole map
   // aka what direction to take on intersections

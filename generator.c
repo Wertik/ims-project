@@ -13,7 +13,7 @@ generator_t *create_gen(position_t pos, int interval, int count) {
   return gen;
 }
 
-generator_t *free_gen(generator_t *gen) { free(gen); }
+void free_gen(generator_t *gen) { free(gen); }
 
 gen_list_t *create_gen_list() {
   gen_list_t *list = (gen_list_t *)malloc(sizeof(gen_list_t));

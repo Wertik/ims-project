@@ -29,6 +29,10 @@ typedef struct {
   gen_list_t *generators;
   car_list_t *cars;
 
+  // cars that left the simulation
+  // keep them for statistics
+  car_list_t *cars_left;
+
   int tick;
   bool paused;
 } simulation_data_t;

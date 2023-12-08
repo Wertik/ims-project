@@ -22,7 +22,7 @@ typedef struct {
 } gen_list_t;
 
 generator_t *create_gen(position_t pos, int interval, int count);
-generator_t *free_gen(generator_t *gen);
+void free_gen(generator_t *gen);
 
 gen_list_t *create_gen_list();
 void add_generator(gen_list_t *list, generator_t *gen);

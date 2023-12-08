@@ -511,8 +511,10 @@ void move_car(simulation_data_t *data, car_t *car) {
     print_car(car, false);
     printf("left the map.\n");
 
+    car->left_at = data->tick;
+
     rem_car(data->cars, car);
-    free_car(car);
+    add_car(data->cars_left, car);
     return;
   }
 

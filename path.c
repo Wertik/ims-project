@@ -9,6 +9,7 @@
 #include "car.h"
 #include "graph.h"
 #include "simulation.h"
+#include "stats.h"
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -84,6 +85,7 @@ int main(int argc, char *argv[]) {
                             .intersections = create_inter_list(),
                             .generators = create_gen_list(),
                             .cars = create_car_list(),
+                            .cars_left = create_car_list(),
                             .tick = 0,
                             .paused = start_paused};
 
@@ -178,7 +180,7 @@ int main(int argc, char *argv[]) {
 
     // run for at least 4 ticks
     // - wait for car generators
-    if (should_quit && data.tick > 4) {
+    if (quit || (should_quit && data.tick > 4)) {
       printf("Stopping...\n");
       // Pauza pro zobrazení výsledků
       SDL_Delay(1000);
@@ -187,11 +189,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // print final statistics
+  stats_t *stats = calculate_stats(&data);
+  print_stats(stats);
+  free_stats(stats);
+
   free_entity_list(data.entities);
   free_road_list(data.roads);
   free_inter_list(data.intersections);
   free_gen_list(data.generators);
   free_car_list(data.cars);
+  free_car_list(data.cars_left);
 
   close_SDL(window, renderer);
   return 0;
