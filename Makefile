@@ -33,3 +33,9 @@ run: $(TARGET)
 clean:
 	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) sdl.o
 
+simulation: $(TARGET)
+	rm -f results.txt
+	for i in 10 30 50 80 100 200 400 600 1000 1500; do \
+		echo "Simulace count=$$i:" >> results.txt; \
+		./$(TARGET) -l -m 3 -s 1 -c $$i >> results.txt; \
+	done
