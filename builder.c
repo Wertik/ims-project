@@ -179,25 +179,25 @@ void build_map(simulation_data_t *data, map_e map, generator_conf_t *gen_conf) {
             ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}}),
             ARR({{.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
                  {.pos = {inter_pos.x - 1, inter_pos.y}, .dir = DIR_LEFT}}),
-            DIR_COUNT);
+            DIR_UP);
       }
 
       BUILD_INTER(data, ARR({{26, 20}}),
                   ARR({{.pos = {26, 21}, .dir = DIR_DOWN},
                        {.pos = {25, 20}, .dir = DIR_LEFT}}),
-                  ARR({{.pos = {26, 19}, .dir = DIR_UP}}), DIR_COUNT);
+                  ARR({{.pos = {26, 19}, .dir = DIR_UP}}), DIR_UP);
 
       for (int row = 10; row < 20; row += 2) {
         BUILD_INTER(data, ARR({{5, row}}),
                     ARR({{{5, row - 1}, DIR_UP}, {{6, row}, DIR_RIGHT}}),
-                    ARR({{{5, row + 1}, DIR_DOWN}}), DIR_COUNT);
+                    ARR({{{5, row + 1}, DIR_DOWN}}), DIR_DOWN);
       }
 
       BUILD_INTER(data, ARR({{5, 20}}), ARR({{{5, 19}, DIR_UP}}),
-                  ARR({{{6, 20}, DIR_RIGHT}, {{5, 21}, DIR_DOWN}}), DIR_COUNT);
+                  ARR({{{6, 20}, DIR_RIGHT}, {{5, 21}, DIR_DOWN}}), DIR_DOWN);
 
       BUILD_INTER(data, ARR({{26, 10}}), ARR({{{26, 11}, DIR_DOWN}}),
-                  ARR({{{25, 10}, DIR_LEFT}, {{26, 9}, DIR_UP}}), DIR_COUNT);
+                  ARR({{{25, 10}, DIR_LEFT}, {{26, 9}, DIR_UP}}), DIR_UP);
 
       // -- add parking spots next to each road
       for (int row = 0; row < 5; ++row) {
