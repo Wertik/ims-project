@@ -35,8 +35,9 @@ inter_t *create_inter() {
   inter->parts = NULL;
   inter->wait_count = 0;
   inter->occupied = false;
+  inter->exit_dir = DIR_COUNT;
 
-  for (int dir = DIR_UP; dir < DIR_COUNT; dir++) {
+  for (direction_e dir = DIR_UP; dir < DIR_COUNT; dir++) {
     inter->wait_spots[dir] = NULL;
     inter->wait_cars[dir] = NULL;
 
@@ -44,6 +45,15 @@ inter_t *create_inter() {
   }
 
   return inter;
+}
+
+void print_inter(inter_t *inter, bool nl) {
+  VERBOSE("inter exit_dir=%s, occupied=%s, wait_count=%d",
+          pretty_dir(inter->exit_dir), BTS(inter->occupied), inter->wait_count);
+
+  if (nl == true) {
+    printf("\n");
+  }
 }
 
 void add_inter_part(inter_t *inter, e_road_t *part) {

@@ -5,7 +5,7 @@ road_t* create_road() {
   MERROR(road);
 
   road->parts = NULL;
-  road->has_exit = false;
+road->has_exit = false;
   road->part_count = 0;
 
   return road;

@@ -121,6 +121,15 @@ void start_graph(simulation_data_t *data, int sim_speed) {
         if (road != NULL) {
           print_road(road, true);
         }
+
+        // print intersection info
+        // (only the core info)
+
+        inter_t *inter = get_inter(data->intersections, (position_t){pos_x, pos_y});
+
+        if (inter != NULL) {
+          print_inter(inter, true);
+        }
       }
     }
 

@@ -1,9 +1,9 @@
 #pragma once
 
+#include "generator.h"
 #include "inter.h"
 #include "pos.h"
 #include "simulation.h"
-#include "generator.h"
 
 // build a road
 // POSITIONS has to be guarded by the ARR() macro if an array literal is used
@@ -25,7 +25,7 @@
     build_road(data, positions, count, DIR, true);      \
   } while (0);
 
-#define BUILD_INTER(DATA, POSITIONS, WAIT_SPOTS, OPTIONS)                   \
+#define BUILD_INTER(DATA, POSITIONS, WAIT_SPOTS, OPTIONS, EXIT_DIR)         \
   do {                                                                      \
     position_t positions[] = POSITIONS;                                     \
     inter_spot_data_t wait_spots[] = WAIT_SPOTS;                            \
@@ -36,7 +36,7 @@
     int option_count = sizeof(options) / sizeof(inter_spot_data_t);         \
                                                                             \
     build_intersection(data, positions, count, wait_spots, wait_spot_count, \
-                       options, option_count);                              \
+                       options, option_count, EXIT_DIR);                    \
   } while (0);
 
 #define BUILD_PARKING(DATA, POSITIONS)                                  \
@@ -88,5 +88,13 @@ typedef enum {
 
   MAP_COUNT,
 } map_e;
+
+void build_road(simulation_data_t *data, position_t positions[], int count,
+                direction_e dir, bool has_exit);
+
+void build_intersection(simulation_data_t *data, position_t parts[],
+                        int part_count, inter_spot_data_t wait_spots[],
+                        int wait_count, inter_spot_data_t options[],
+                        int option_count, direction_e exit_dir);
 
 void build_map(simulation_data_t *data, map_e map, generator_conf_t *gen_conf);

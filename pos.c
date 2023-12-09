@@ -95,6 +95,22 @@ position_t add_dir(position_t pos, direction_e direction) {
   return pos;
 }
 
+const char *pretty_dir(direction_e dir) {
+  switch (dir) {
+    case DIR_UP:
+      return "DIR_UP";
+    case DIR_LEFT:
+      return "DIR_LEFT";
+    case DIR_DOWN:
+      return "DIR_DOWN";
+    case DIR_RIGHT:
+      return "DIR_RIGHT";
+    case DIR_COUNT:
+      return "DIR_COUNT";
+  }
+  return "UNKNOWN_DIR";
+}
+
 position_t set_dir(position_t pos, direction_e direction) {
   pos.x = 0;
   pos.y = 0;

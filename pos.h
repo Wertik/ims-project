@@ -37,6 +37,8 @@ position_t set_dir(position_t pos, direction_e direction);
 
 direction_e inverse_dir(direction_e dir);
 
+const char *pretty_dir(direction_e dir);
+
 void print_pos(position_t pos);
 
 direction_e *get_nav(position_t from, position_t to, bool y_prio, int *count);

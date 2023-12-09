@@ -160,6 +160,9 @@ void print_entity(entity_t *e, bool nl) {
       break;
     default:
       VERBOSE("entity %s @ [%d;%d]", pretty_type(e->type), e->pos.x, e->pos.y);
+      if (nl) {
+        printf("\n");
+      }
       break;
   }
 }

@@ -176,25 +176,22 @@ end:
   return !cars_left;
 }
 
-
 // Function for generating exponential numbers in the [0,1) range
-double generate_exponential() {
-    return -log(1.0 - (double)rand() / RAND_MAX);
-}
+double generate_exponential() { return -log(1.0 - (double)rand() / RAND_MAX); }
 
 // Function to simulate shopping time in ticks
 int simulate_shopping_time() {
-    // Average shopping time in minutes
-    int average_shopping_time = CAR_PARKED_TICKS;
+  // Average shopping time in minutes
+  int average_shopping_time = CAR_PARKED_TICKS;
 
-    // Convert to ticks (1 minute = 10 ticks)
-    int average_shopping_ticks = average_shopping_time * 10;
+  // Convert to ticks (1 minute = 10 ticks)
+  int average_shopping_ticks = average_shopping_time * 10;
 
-    // Generate exponential shopping time in ticks
-    double exponential_time = generate_exponential();
+  // Generate exponential shopping time in ticks
+  double exponential_time = generate_exponential();
 
-    // Round and return the result
-    return (int)(exponential_time * average_shopping_ticks);
+  // Round and return the result
+  return (int)(exponential_time * average_shopping_ticks);
 }
 
 void run_car(simulation_data_t *data, car_t *car) {
@@ -413,82 +410,98 @@ void run_car(simulation_data_t *data, car_t *car) {
     }
 
     direction_e dir = DIR_UP;
+    e_road_t *chosen_exit = NULL;
 
-    // decide where we're going on the intersection
-    while (true) {
-      direction_e curr_dir = dir;
+    if (car->leaving == true && inter->exit_dir != DIR_COUNT) {
+      chosen_exit = inter->options[inter->exit_dir];
+    }
 
-      if ((++dir) >= DIR_COUNT) {
-        dir = DIR_UP;
-      }
+    if (chosen_exit == NULL) {
+      // decide where we're going on the intersection
+      while (true) {
+        direction_e curr_dir = dir;
 
-      // don't allow to exit on the same spot we're waiting on
-      if (inter_dir == curr_dir) {
-        continue;
-      }
+        if ((++dir) >= DIR_COUNT) {
+          dir = DIR_UP;
+        }
 
-      e_road_t *opt = inter->options[curr_dir];
+        // don't allow to exit on the same spot we're waiting on
+        if (inter_dir == curr_dir) {
+          continue;
+        }
 
-      if (opt == NULL) {
-        continue;
-      }
+        e_road_t *opt = inter->options[curr_dir];
 
-      // pick this road?
-      // - if the road leads to exit and we're leaving
-      // - based on chance otherwise
+        if (opt == NULL) {
+          continue;
+        }
 
-      road_t *road = get_road(data->roads, opt->pos);
+        // pick this road?
+        // - if the road leads to exit and we're leaving
+        // - based on chance otherwise
 
-      bool choose_road = false;
+        road_t *road = get_road(data->roads, opt->pos);
 
-      if (road != NULL && road->has_exit == true) {
-        if (car->leaving == true) {
-          choose_road = true;
+        bool choose_road = false;
+        bool has_exit = road != NULL && road->has_exit == true;
+
+        if (has_exit == true) {
+          if (car->leaving == true) {
+            // should've already chosen this way, keep this just in case
+            choose_road = true;
+          } else {
+            // car is not leaving, have a 10% chance that we leave anyway
+            choose_road = (rand() % 99) < 10;
+          }
         } else {
-          // car is not leaving, have a 10% chance that we leave anyway
-          choose_road = (rand() % 99) < 10;
+          choose_road = (rand() % (count + 1)) >= 1;
         }
-      } else {
-        choose_road = (rand() % (count + 1)) >= 1;
-      }
 
-      VERBOSE("inter exit at [%d;%d] road=%s has_exit=%s chosen=%s\n",
-              opt->pos.x, opt->pos.y, BTS(road != NULL),
+        if (choose_road == true) {
+          VERBOSE(
+              "chose inter exit at [%d;%d] is_exit_dir=%s has_exit=%s "
+              "chosen=%s\n",
+              opt->pos.x, opt->pos.y, BTS(inter->exit_dir == curr_dir),
               BTS(road != NULL && road->has_exit == true), BTS(choose_road));
-
-      if (choose_road == true) {
-        // navigate the car through the intersection
-
-        int nav_count = 0;
-        direction_e *nav =
-            get_nav(wait_spot->pos, opt->pos,
-                    inter_dir == DIR_DOWN || inter_dir == DIR_UP, &nav_count);
-
-        VERBOSE("navigate from ");
-        print_pos(wait_spot->pos);
-        VERBOSE("to ");
-        print_pos(opt->pos);
-
-        if (nav == NULL) {
-          fprintf(stderr,
-                  "run_car: invalid navigation through intersection.\n");
-          exit(EXIT_FAILURE);
+          chosen_exit = opt;
+          break;
         }
-
-        // add steps based on the direction
-        add_nav_steps(car, nav, nav_count);
-
-        VERBOSE("got navigation steps\n");
-
-        // print steps
-        for (int i = 0; i < nav_count; i++) {
-          VERBOSE("- %d\n", nav[i]);
-        }
-
-        free(nav);
-        break;
       }
     }
+
+    if (chosen_exit == NULL) {
+      VERBOSE("failed to choose intersection exit.\n");
+      return;
+    }
+
+    // navigate the car through the intersection
+
+    int nav_count = 0;
+    direction_e *nav =
+        get_nav(wait_spot->pos, chosen_exit->pos,
+                inter_dir == DIR_DOWN || inter_dir == DIR_UP, &nav_count);
+
+    VERBOSE("navigate from ");
+    print_pos(wait_spot->pos);
+    VERBOSE("to ");
+    print_pos(chosen_exit->pos);
+
+    if (nav == NULL) {
+      fprintf(stderr, "run_car: invalid navigation through intersection.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // add steps based on the direction
+    add_nav_steps(car, nav, nav_count);
+
+    VERBOSE("got navigation steps\n");
+
+    // print steps
+    for (int i = 0; i < nav_count; i++) {
+      VERBOSE("- %d\n", nav[i]);
+    }
+
+    free(nav);
   }
   free(around);
 }

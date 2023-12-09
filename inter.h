@@ -1,8 +1,8 @@
 #pragma once
 
+#include "car.h"
 #include "pos.h"
 #include "road.h"
-#include "car.h"
 
 // an intersection
 // - when an intersection is occupied, don't allow any more cars onto it
@@ -25,6 +25,8 @@ typedef struct {
 
   // options, aka where can I exit this intersection
   e_road_t *options[DIR_COUNT];
+
+  direction_e exit_dir;
 } inter_t;
 
 typedef struct {
@@ -44,6 +46,8 @@ void free_inter(inter_t *inter);
 
 void add_car_wait_spot(inter_t *inter, direction_e dir, car_t *car);
 void rem_car_wait_spot(inter_t *inter, direction_e dir);
+
+void print_inter(inter_t *inter, bool nl);
 
 // get intersection by parts
 inter_t *get_inter(inter_list_t *list, position_t pos);
