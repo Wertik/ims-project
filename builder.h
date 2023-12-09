@@ -3,6 +3,7 @@
 #include "inter.h"
 #include "pos.h"
 #include "simulation.h"
+#include "generator.h"
 
 // build a road
 // POSITIONS has to be guarded by the ARR() macro if an array literal is used
@@ -88,4 +89,4 @@ typedef enum {
   MAP_COUNT,
 } map_e;
 
-void build_map(simulation_data_t *data, map_e map, int cars_count);
+void build_map(simulation_data_t *data, map_e map, generator_conf_t *gen_conf);

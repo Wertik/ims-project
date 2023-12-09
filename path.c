@@ -158,7 +158,7 @@ void start_graph(simulation_data_t *data, int sim_speed) {
 
 // run the simulation and return statistics
 stats_t *start_simulation(map_e map, bool start_paused, bool graph,
-                          int sim_speed, int cars_count) {
+                          int sim_speed, generator_conf_t gen_conf) {
   simulation_data_t data = {.roads = create_road_list(),
                             .entities = create_entity_list(),
                             .intersections = create_inter_list(),
@@ -168,7 +168,7 @@ stats_t *start_simulation(map_e map, bool start_paused, bool graph,
                             .tick = 0,
                             .paused = start_paused};
 
-  build_map(&data, map, cars_count);
+  build_map(&data, map, &gen_conf);
 
   // init random
 
@@ -205,9 +205,10 @@ int main(int argc, char *argv[]) {
   bool start_paused = false;
   int sim_speed = 400;
   bool graph = true;
-  int cars_count = 0;
 
-  while ((opt = getopt(argc, argv, "phm:s:c:l")) != -1) {
+  generator_conf_t gen_conf = {.count = -1, .interval = -1};
+
+  while ((opt = getopt(argc, argv, "phm:s:c:li:")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -217,12 +218,14 @@ int main(int argc, char *argv[]) {
             "-m MAP id of map to use for the simulation (enum map_e)\n"
             "-s SPEED time in ms to wait each tick\n"
             "-c COUNT number of cars to generate\n"
+            "-i INTERVAL interval between car generator calls\n"
             "-l run without a graphical interface\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
         if (m >= MAP_COUNT || m < 0) {
-          printf("invalid map %s, range: <%d; %d>\n", optarg, 0, MAP_COUNT);
+          fprintf(stderr, "invalid map %s, range: <%d; %d>\n", optarg, 0,
+                  MAP_COUNT);
           return EXIT_FAILURE;
         }
         map = m;
@@ -231,7 +234,7 @@ int main(int argc, char *argv[]) {
       case 's': {
         int s = atoi(optarg);
         if (s < 0) {
-          printf("SPEED cannot be negative.");
+          fprintf(stderr, "SPEED cannot be negative.\n");
           return EXIT_FAILURE;
         }
         sim_speed = s;
@@ -240,10 +243,19 @@ int main(int argc, char *argv[]) {
       case 'c': {
         int c = atoi(optarg);
         if (c <= 0) {
-          printf("cannot go under 1 cars.");
+          fprintf(stderr, "cannot go under 1 cars.\n");
           return EXIT_FAILURE;
         }
-        cars_count = c;
+        gen_conf.count = c;
+        break;
+      }
+      case 'i': {
+        int i = atoi(optarg);
+        if (i <= 0) {
+          fprintf(stderr, "interval cannot be <1.\n");
+          return EXIT_FAILURE;
+        }
+        gen_conf.interval = i;
         break;
       }
       case 'l':
@@ -253,17 +265,17 @@ int main(int argc, char *argv[]) {
         start_paused = true;
         break;
       case ':':
-        printf("option needs a value\n");
+        fprintf(stderr, "option needs a value\n");
         break;
       case '?':
-        printf("unknown option : %c\n", optopt);
+        fprintf(stderr, "unknown option : %c\n", optopt);
         break;
     }
   }
 
   // run the simulation!
   stats_t *stats =
-      start_simulation(map, start_paused, graph, sim_speed, cars_count);
+      start_simulation(map, start_paused, graph, sim_speed, gen_conf);
 
   print_stats(stats);
   free_stats(stats);

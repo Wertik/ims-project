@@ -17,6 +17,11 @@ typedef struct {
 } generator_t;
 
 typedef struct {
+  int interval;
+  int count;
+} generator_conf_t;
+
+typedef struct {
   int size;
   generator_t **data;
 } gen_list_t;

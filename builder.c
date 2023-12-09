@@ -52,7 +52,7 @@ void build_intersection(simulation_data_t *data, position_t parts[],
   add_inter(data->intersections, inter);
 }
 
-void build_map(simulation_data_t *data, map_e map, int cars_count) {
+void build_map(simulation_data_t *data, map_e map, generator_conf_t *gen_conf) {
   VERBOSE("Building map %d...\n", map);
 
   switch (map) {
@@ -111,7 +111,6 @@ void build_map(simulation_data_t *data, map_e map, int cars_count) {
       ADD_CARS(data, ARR({{9, 10}, {14, 14}}));
       break;
 
-
     case PARKING_LOT_MAIN: {
       // -- build extended vertical roads for car entrances
       position_t road_positions[] = {{5, 3},  {5, 4},  {5, 5},  {5, 6},
@@ -122,11 +121,15 @@ void build_map(simulation_data_t *data, map_e map, int cars_count) {
 
       build_road(data, road_positions, num_positions, DIR_DOWN, false);
 
-      build_road(data, (position_t[]){{5, 21}, {5, 22}, {5, 23}, {5, 24}, {5, 25}, {5, 26}}, 6, DIR_DOWN,
-                 true);
+      build_road(
+          data,
+          (position_t[]){{5, 21}, {5, 22}, {5, 23}, {5, 24}, {5, 25}, {5, 26}},
+          6, DIR_DOWN, true);
 
-      build_road(data, (position_t[]){{26, 4}, {26, 5}, {26, 6}, {26, 7}, {26, 8}, {26, 9}}, 6, DIR_UP,
-                 true);
+      build_road(
+          data,
+          (position_t[]){{26, 4}, {26, 5}, {26, 6}, {26, 7}, {26, 8}, {26, 9}},
+          6, DIR_UP, true);
 
       build_road(data,
                  (position_t[]){{26, 11},
@@ -211,53 +214,61 @@ void build_map(simulation_data_t *data, map_e map, int cars_count) {
       map_exit2->type = MAP_EXIT;
       add_entity(data->entities, map_exit2);
 
-      // -- adjust road direction for the ends of the vertical roads
-
-      // e_road_t *top_right =
-      //     (e_road_t *)get_entity(data->entities, (position_t){26, 10});
-      // top_right->direction = DIR_LEFT;
-      if (cars_count > 0) {
-        cars_count = cars_count / 2;
-        ADD_GENERATOR(data, ARR({5, 3}), 4, cars_count);
-        ADD_GENERATOR(data, ARR({26, 27}), 4, cars_count);
-      } else {
-        ADD_GENERATOR(data, ARR({5, 3}), 4, 100);
-        ADD_GENERATOR(data, ARR({26, 27}), 4, 100);
-      }
+      int car_count = gen_conf->count == -1 ? 100 : gen_conf->count / 2;
+      int car_interval = gen_conf->interval == -1 ? 4 : gen_conf->interval;
       
+      ADD_GENERATOR(data, ARR({5, 3}), car_interval, car_count);
+      ADD_GENERATOR(data, ARR({26, 27}), car_interval, car_count);
       break;
     }
 
-      case PARKING_LOT_RIGHT: {
+    case PARKING_LOT_RIGHT: {
       // -- build extended vertical roads for car entrances
-      position_t road_positions[] = {{5, 11},
-                                     {5, 13}, {5, 15}, {5, 17}, {5, 19}, {5, 21},
-                                     {5, 22}, {5, 23}, {5, 24}, {5, 25}, {5, 26}, {5, 27}};
+      position_t road_positions[] = {{5, 11}, {5, 13}, {5, 15}, {5, 17},
+                                     {5, 19}, {5, 21}, {5, 22}, {5, 23},
+                                     {5, 24}, {5, 25}, {5, 26}, {5, 27}};
 
       int num_positions = sizeof(road_positions) / sizeof(road_positions[0]);
 
       build_road(data, road_positions, num_positions, DIR_UP, false);
 
-      build_road(data, (position_t[]){{5, 4},{5, 5},{5, 6},
-                                      {5, 7},{5, 8},{5, 9},}, 6, DIR_UP,
-                 true);
-
-      build_road(data, (position_t[]){
-                                {26, 21},
-                                {26, 22},
-                                {26, 23},
-                                {26, 24},
-                                {26, 25},
-                                {26, 26},}, 6, DIR_DOWN,
-                 true);
+      build_road(data,
+                 (position_t[]){
+                     {5, 4},
+                     {5, 5},
+                     {5, 6},
+                     {5, 7},
+                     {5, 8},
+                     {5, 9},
+                 },
+                 6, DIR_UP, true);
 
       build_road(data,
-                 (position_t[]){{26, 3}, {26, 4}, {26, 5}, {26, 6}, {26, 7}, {26, 8}, {26, 9}, {26, 11},
-                                {26, 13},
-                                {26, 15},
-                                {26, 17},
-                                {26, 19},
-                                },
+                 (position_t[]){
+                     {26, 21},
+                     {26, 22},
+                     {26, 23},
+                     {26, 24},
+                     {26, 25},
+                     {26, 26},
+                 },
+                 6, DIR_DOWN, true);
+
+      build_road(data,
+                 (position_t[]){
+                     {26, 3},
+                     {26, 4},
+                     {26, 5},
+                     {26, 6},
+                     {26, 7},
+                     {26, 8},
+                     {26, 9},
+                     {26, 11},
+                     {26, 13},
+                     {26, 15},
+                     {26, 17},
+                     {26, 19},
+                 },
                  12, DIR_DOWN, false);
 
       /// -- build horizontal roads for parking access, all going left except
@@ -287,19 +298,16 @@ void build_map(simulation_data_t *data, map_e map, int cars_count) {
             data, ARR({inter_pos}),
             ARR({{.pos = {inter_pos.x, inter_pos.y - 1}, .dir = DIR_UP},
                  {.pos = {inter_pos.x - 1, inter_pos.y}, .dir = DIR_LEFT}}),
-            ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}})
-            );
+            ARR({{.pos = {inter_pos.x, inter_pos.y + 1}, .dir = DIR_DOWN}}));
       }
 
       BUILD_INTER(data, ARR({{26, 20}}),
                   ARR({{.pos = {26, 19}, .dir = DIR_UP}}),
                   ARR({{.pos = {26, 21}, .dir = DIR_DOWN},
                        {.pos = {25, 20}, .dir = DIR_LEFT}}));
-                  
 
       for (int row = 10; row < 20; row += 2) {
-        BUILD_INTER(data, ARR({{5, row}}),
-                    ARR({{{5, row + 1}, DIR_DOWN}}),
+        BUILD_INTER(data, ARR({{5, row}}), ARR({{{5, row + 1}, DIR_DOWN}}),
                     ARR({{{5, row - 1}, DIR_UP}, {{6, row}, DIR_RIGHT}}));
       }
 
@@ -330,26 +338,13 @@ void build_map(simulation_data_t *data, map_e map, int cars_count) {
       map_exit2->type = MAP_EXIT;
       add_entity(data->entities, map_exit2);
 
-      // -- adjust road direction for the ends of the vertical roads
-
-      // e_road_t *top_right =
-      //     (e_road_t *)get_entity(data->entities, (position_t){26, 10});
-      // top_right->direction = DIR_LEFT;
-
-      if (cars_count > 0) {
-        cars_count = cars_count / 2;
-        ADD_GENERATOR(data, ARR({5, 27}), 4, cars_count);
-        ADD_GENERATOR(data, ARR({26, 3}), 4, cars_count);
-      } else {
-        ADD_GENERATOR(data, ARR({5, 27}), 4, 100);
-        ADD_GENERATOR(data, ARR({26, 3}), 4, 100);
-      }
+      int car_count = gen_conf->count == -1 ? 100 : gen_conf->count / 2;
+      int car_interval = gen_conf->interval == -1 ? 4 : gen_conf->interval;
+      
+      ADD_GENERATOR(data, ARR({5, 27}), car_interval, car_count);
+      ADD_GENERATOR(data, ARR({26, 3}), car_interval, car_count);
       break;
     }
-
-    
-
-    
 
     case SINGLE_INTER:
       // multiple cars meet on a single intersection
