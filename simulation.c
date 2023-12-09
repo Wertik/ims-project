@@ -176,10 +176,32 @@ end:
   return !cars_left;
 }
 
+
+// Function for generating exponential numbers in the [0,1) range
+double generate_exponential() {
+    return -log(1.0 - (double)rand() / RAND_MAX);
+}
+
+// Function to simulate shopping time in ticks
+int simulate_shopping_time() {
+    // Average shopping time in minutes
+    int average_shopping_time = CAR_PARKED_TICKS;
+
+    // Convert to ticks (1 minute = 10 ticks)
+    int average_shopping_ticks = average_shopping_time * 10;
+
+    // Generate exponential shopping time in ticks
+    double exponential_time = generate_exponential();
+
+    // Round and return the result
+    return (int)(exponential_time * average_shopping_ticks);
+}
+
 void run_car(simulation_data_t *data, car_t *car) {
   if (car->parked) {
+    int shopping_time = simulate_shopping_time();
     // once we waited for long enough, head towards the exit
-    if (data->tick >= car->parked_at + CAR_PARKED_TICKS) {
+    if (data->tick >= car->parked_at + shopping_time) {
       car->leaving = true;
       car->parked = false;
       VERBOSE("leaving the parking lot.\n");

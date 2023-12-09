@@ -12,7 +12,7 @@ TEST_SOURCES=$(shell find . -path '*.c' ! -path './path.c')
 TEST_OBJECTS=$(subst .c,.o,$(TEST_SOURCES))
 
 CFLAGS=-g -Wall -Wextra -pedantic
-LDFLAGS=-lSDL2
+LDFLAGS=-lSDL2 -lm
 
 .PHONY: all
 

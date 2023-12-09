@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <math.h>
 
 #include "entity.h"
 #include "inter.h"
@@ -20,7 +21,7 @@
 #define CELL_SIZE 20
 
 // how many ticks a car should wait at the parking spot
-#define CAR_PARKED_TICKS 40
+#define CAR_PARKED_TICKS 100
 
 typedef struct {
   road_list_t *roads;
@@ -42,6 +43,9 @@ void run_generator(simulation_data_t *data, generator_t *gen);
 
 void run_inters(simulation_data_t *data);
 void run_inter(simulation_data_t *data, inter_t *inter);
+
+double generate_exponential();
+int simulate_shopping_time();
 
 bool run_cars(simulation_data_t *data);
 void run_car(simulation_data_t *data, car_t *car);
