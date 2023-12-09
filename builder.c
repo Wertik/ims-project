@@ -52,7 +52,7 @@ void build_intersection(simulation_data_t *data, position_t parts[],
   add_inter(data->intersections, inter);
 }
 
-void build_map(simulation_data_t *data, map_e map) {
+void build_map(simulation_data_t *data, map_e map, int cars_count) {
   VERBOSE("Building map %d...\n", map);
 
   switch (map) {
@@ -216,9 +216,15 @@ void build_map(simulation_data_t *data, map_e map) {
       // e_road_t *top_right =
       //     (e_road_t *)get_entity(data->entities, (position_t){26, 10});
       // top_right->direction = DIR_LEFT;
-
-      ADD_GENERATOR(data, ARR({5, 3}), 4, 100);
-      ADD_GENERATOR(data, ARR({26, 27}), 4, 100);
+      if (cars_count > 0) {
+        cars_count = cars_count / 2;
+        ADD_GENERATOR(data, ARR({5, 3}), 4, cars_count);
+        ADD_GENERATOR(data, ARR({26, 27}), 4, cars_count);
+      } else {
+        ADD_GENERATOR(data, ARR({5, 3}), 4, 100);
+        ADD_GENERATOR(data, ARR({26, 27}), 4, 100);
+      }
+      
       break;
     }
 
@@ -330,8 +336,14 @@ void build_map(simulation_data_t *data, map_e map) {
       //     (e_road_t *)get_entity(data->entities, (position_t){26, 10});
       // top_right->direction = DIR_LEFT;
 
-      ADD_GENERATOR(data, ARR({26, 3}), 4, 100);
-      ADD_GENERATOR(data, ARR({5, 27}), 4, 100);
+      if (cars_count > 0) {
+        cars_count = cars_count / 2;
+        ADD_GENERATOR(data, ARR({5, 27}), 4, cars_count);
+        ADD_GENERATOR(data, ARR({26, 3}), 4, cars_count);
+      } else {
+        ADD_GENERATOR(data, ARR({5, 27}), 4, 100);
+        ADD_GENERATOR(data, ARR({26, 3}), 4, 100);
+      }
       break;
     }
 

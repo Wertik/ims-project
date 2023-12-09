@@ -154,7 +154,7 @@ void start_graph(simulation_data_t *data, int sim_speed) {
 
 // run the simulation and return statistics
 stats_t *start_simulation(map_e map, bool start_paused, bool graph,
-                          int sim_speed) {
+                          int sim_speed, int cars_count) {
   simulation_data_t data = {.roads = create_road_list(),
                             .entities = create_entity_list(),
                             .intersections = create_inter_list(),
@@ -164,7 +164,7 @@ stats_t *start_simulation(map_e map, bool start_paused, bool graph,
                             .tick = 0,
                             .paused = start_paused};
 
-  build_map(&data, map);
+  build_map(&data, map, cars_count);
 
   // init random
 
@@ -201,8 +201,9 @@ int main(int argc, char *argv[]) {
   bool start_paused = false;
   int sim_speed = 400;
   bool graph = true;
+  int cars_count = 0;
 
-  while ((opt = getopt(argc, argv, "phm:s:l")) != -1) {
+  while ((opt = getopt(argc, argv, "phm:s:c:l")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -211,6 +212,7 @@ int main(int argc, char *argv[]) {
             "-p start the simulation paused\n"
             "-m MAP id of map to use for the simulation (enum map_e)\n"
             "-s SPEED time in ms to wait each tick\n"
+            "-c COUNT number of cars to generate\n"
             "-l run without a graphical interface\n");
         return EXIT_SUCCESS;
       case 'm': {
@@ -231,6 +233,15 @@ int main(int argc, char *argv[]) {
         sim_speed = s;
         break;
       }
+      case 'c': {
+        int c = atoi(optarg);
+        if (c <= 0) {
+          printf("cannot go under 1 cars.");
+          return EXIT_FAILURE;
+        }
+        cars_count = c;
+        break;
+      }
       case 'l':
         graph = false;
         break;
@@ -247,7 +258,7 @@ int main(int argc, char *argv[]) {
   }
 
   // run the simulation!
-  stats_t *stats = start_simulation(map, start_paused, graph, sim_speed);
+  stats_t *stats = start_simulation(map, start_paused, graph, sim_speed, cars_count);
 
   print_stats(stats);
   free_stats(stats);
