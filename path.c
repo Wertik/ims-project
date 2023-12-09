@@ -32,7 +32,9 @@ void start_headless(simulation_data_t *data, int sim_speed) {
 
     bool should_quit = !run(data);
 
-    usleep(sim_speed * 1000);
+    if (sim_speed != 0) {
+      usleep(sim_speed * 1000);
+    }
 
     VERBOSE("---\n");
     data->tick += 1;
@@ -133,7 +135,9 @@ void start_graph(simulation_data_t *data, int sim_speed) {
 
     draw(renderer, data);
 
-    SDL_Delay(sim_speed);
+    if (sim_speed != 0) {
+      SDL_Delay(sim_speed);
+    }
 
     VERBOSE("---\n");
     data->tick += 1;
@@ -226,8 +230,8 @@ int main(int argc, char *argv[]) {
       }
       case 's': {
         int s = atoi(optarg);
-        if (s <= 0) {
-          printf("cannot go under 1ms a tick.");
+        if (s < 0) {
+          printf("SPEED cannot be negative.");
           return EXIT_FAILURE;
         }
         sim_speed = s;
@@ -258,7 +262,8 @@ int main(int argc, char *argv[]) {
   }
 
   // run the simulation!
-  stats_t *stats = start_simulation(map, start_paused, graph, sim_speed, cars_count);
+  stats_t *stats =
+      start_simulation(map, start_paused, graph, sim_speed, cars_count);
 
   print_stats(stats);
   free_stats(stats);
