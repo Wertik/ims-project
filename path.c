@@ -16,12 +16,14 @@ extern int optind, opterr, optopt;
 
 bool run(simulation_data_t *data) {
   run_inters(data);
-  bool run_sim = run_cars(data);
+
+  bool cars_left = run_cars(data);
 
   // run generators last to draw freshly generated cars before they move
-  run_generators(data);
+  bool cars_to_generate = run_generators(data);
 
-  return run_sim;
+  // run the simulation until all cars left and there are still cars to generate
+  return !cars_left || cars_to_generate;
 }
 
 void start_headless(simulation_data_t *data, int sim_speed) {
@@ -30,7 +32,7 @@ void start_headless(simulation_data_t *data, int sim_speed) {
   while (!quit) {
     VERBOSE("--- Tick #%d\n", data->tick);
 
-    bool should_quit = !run(data);
+    quit = !run(data);
 
     if (sim_speed != 0) {
       usleep(sim_speed * 1000);
@@ -39,14 +41,11 @@ void start_headless(simulation_data_t *data, int sim_speed) {
     VERBOSE("---\n");
     data->tick += 1;
 
-    // run for at least 4 ticks
-    // - wait for car generators
-    if (quit || (should_quit && data->tick > 4)) {
+    if (quit) {
       VERBOSE("Stopping...\n");
       // Pauza pro zobrazení výsledků
       usleep(1000000);
-      quit = true;
-      continue;
+      break;
     }
   }
 }
@@ -153,7 +152,7 @@ void start_graph(simulation_data_t *data, int sim_speed) {
 
     // run for at least 4 ticks
     // - wait for car generators
-    if (quit || (should_quit && data->tick > 4)) {
+    if (quit || should_quit) {
       VERBOSE("Stopping...\n");
       // Pauza pro zobrazení výsledků
       SDL_Delay(1000);
@@ -215,10 +214,11 @@ int main(int argc, char *argv[]) {
   int sim_speed = 400;
   bool graph = true;
   bool csv = false;
+  int runs = 1;
 
   generator_conf_t gen_conf = {.count = -1, .interval = -1};
 
-  while ((opt = getopt(argc, argv, "phm:s:c:li:v")) != -1) {
+  while ((opt = getopt(argc, argv, "phm:s:c:li:vr:")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -230,7 +230,8 @@ int main(int argc, char *argv[]) {
             "-c COUNT number of cars to generate\n"
             "-i INTERVAL interval between car generator calls\n"
             "-l run without a graphical interface\n"
-            "-v return the statistics in csv format\n");
+            "-v return the statistics in csv format\n"
+            "-r RUNS how many runs of the simulation to do, statistics are averaged out\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
@@ -253,6 +254,15 @@ int main(int argc, char *argv[]) {
           return EXIT_FAILURE;
         }
         sim_speed = s;
+        break;
+      }
+      case 'r': {
+        int r = atoi(optarg);
+        if (r <= 0) {
+          fprintf(stderr, "number of runs has to fall into <1;INT_MAX>.\n");
+          return EXIT_FAILURE;
+        }
+        runs = r;
         break;
       }
       case 'c': {
@@ -288,11 +298,48 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // run the simulation!
-  stats_t *stats =
-      start_simulation(map, start_paused, graph, sim_speed, gen_conf);
+  stats_t *final_stats = create_stats();
 
-  print_stats(stats, csv);
-  free_stats(stats);
+  stats_t **stat_list = (stats_t**)malloc(sizeof(stats_t*) * runs);
+  MERROR(stat_list);
+  memset(stat_list, 0, sizeof(stats_t*) * runs);
+
+  // run the simulation(s)!
+  for (int run = 0; run < runs; run++) {
+    VERBOSE("Start run #%d\n", run);
+    stat_list[run] = start_simulation(map, start_paused, graph, sim_speed, gen_conf);
+    VERBOSE("End run #%d\n", run);
+  }
+
+  // average the stats out
+  float sum_avg_inter_wait = 0;
+  float sum_avg_until_leave = 0;
+  float sum_avg_until_parked = 0;
+  float sum_perc_left_without_park = 0;
+  for (int run = 0; run < runs; run++) {
+    stats_t *stats = stat_list[run];
+    if (stats == NULL) {
+      // the run didn't finish
+      break;
+    }
+
+    sum_avg_inter_wait += stats->avg_inter_wait;
+    sum_avg_until_leave += stats->avg_until_leave;
+    sum_avg_until_parked += stats->avg_until_parked;
+    sum_perc_left_without_park += stats->perc_left_without_park;
+
+    free_stats(stats);
+  }
+  free(stat_list);
+  stat_list = NULL;
+
+  final_stats->avg_inter_wait = sum_avg_inter_wait / (float)runs;
+  final_stats->avg_until_leave = sum_avg_until_leave / (float)runs;
+  final_stats->avg_until_parked = sum_avg_until_parked / (float)runs;
+  final_stats->perc_left_without_park = sum_perc_left_without_park / (float)runs;
+
+  print_stats(final_stats, csv);
+
+  free_stats(final_stats);
   return 0;
 }

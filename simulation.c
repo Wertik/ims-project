@@ -1,16 +1,23 @@
 #include "simulation.h"
 
-void run_generators(simulation_data_t *data) {
+// return whether there are still more cars to generate
+bool run_generators(simulation_data_t *data) {
+  bool cars_left_to_generate = false;
+
   for (int i = 0; i < data->generators->size; i++) {
     generator_t *gen = data->generators->data[i];
     run_generator(data, gen);
+
+    if (gen->gen_count < gen->count) {
+      cars_left_to_generate = true;
+    }
   }
+  return cars_left_to_generate;
 }
 
 void run_generator(simulation_data_t *data, generator_t *gen) {
   if (gen->last_gen_at + gen->next_gen <= data->tick &&
       (gen->gen_count < gen->count || gen->count == -1)) {
-        
     if (get_car(data->cars, gen->pos) != NULL) {
       VERBOSE("cannot generate on [%d;%d], spot occupied.\n", gen->pos.x,
               gen->pos.y);
@@ -176,7 +183,7 @@ bool run_cars(simulation_data_t *data) {
   }
 
 end:
-  return !cars_left;
+  return cars_left;
 }
 
 // Function to simulate shopping time in ticks
