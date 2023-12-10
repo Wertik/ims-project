@@ -48,7 +48,7 @@ clean:
 	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) $(RESULTS_FILE) $(ARCHIVE_NAME).tar.gz
 
 pack:
-	tar cvzf $(ARCHIVE_NAME).tar.gz *.c *.h Makefile
+	tar cvzf $(ARCHIVE_NAME).tar.gz *.c *.h Makefile documentation.pdf
 
 simulation: $(TARGET)
 	rm -f $(MAP_NO_RIGHTWAY_RESULTS_FILE)
