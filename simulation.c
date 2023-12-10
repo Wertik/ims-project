@@ -8,8 +8,9 @@ void run_generators(simulation_data_t *data) {
 }
 
 void run_generator(simulation_data_t *data, generator_t *gen) {
-  if (gen->last_gen_at + gen->next_gen == data->tick &&
+  if (gen->last_gen_at + gen->next_gen <= data->tick &&
       (gen->gen_count < gen->count || gen->count == -1)) {
+        
     if (get_car(data->cars, gen->pos) != NULL) {
       VERBOSE("cannot generate on [%d;%d], spot occupied.\n", gen->pos.x,
               gen->pos.y);
