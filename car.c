@@ -25,6 +25,8 @@ car_t *create_car(position_t pos) {
   car->inter_nav = NULL;
   car->inter_nav_count = 0;
 
+  car->inter_wait_time = 0;
+
   return car;
 }
 

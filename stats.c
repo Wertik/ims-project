@@ -22,6 +22,7 @@ stats_t *calculate_stats(simulation_data_t *data) {
   int until_parked_sum = 0;
   int until_left_sum = 0;
   int without_park = 0;
+  int inter_wait_sum = 0;
   for (int i = 0; i < car_count; i++) {
     car_t *car = data->cars_left->data[i];
 
@@ -36,11 +37,14 @@ stats_t *calculate_stats(simulation_data_t *data) {
       until_left_sum += car->left_at - car->parked_at;
     }
 
+    inter_wait_sum += car->inter_wait_time;
+
     print_car(car, true);
   }
   stats->avg_until_parked = until_parked_sum / (float)car_count;
   stats->avg_until_leave = until_left_sum / (float)car_count;
   stats->perc_left_without_park = without_park / (float)car_count;
+  stats->avg_inter_wait = inter_wait_sum / (float)car_count;
 
   return stats;
 }

@@ -207,6 +207,7 @@ void run_car(simulation_data_t *data, car_t *car) {
 
   // waiting on intersection, don't move
   if (car->waiting) {
+    car->inter_wait_time += 1;
     car->speed = (position_t){.x = 0, .y = 0};
     return;
   }

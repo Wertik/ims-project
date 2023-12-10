@@ -43,6 +43,9 @@ typedef struct {
   // aka what directions to take right now
   direction_e *nav;
   int nav_count;
+
+  // how many ticks did the car spend waiting on an intersection
+  int inter_wait_time;
 } car_t;
 
 typedef struct {
