@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
   bool graph = true;
   bool csv = false;
   int runs = 1;
-  int timeout = 120;
+  int timeout = 30;
 
   generator_conf_t gen_conf = {.count = -1, .interval = -1};
 
