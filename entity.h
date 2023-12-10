@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL2/SDL_pixels.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -17,18 +16,12 @@ typedef struct {
   entity_type_e type;
 
   position_t pos;
-
-  bool c_override;
-  SDL_Color color;
 } entity_t;
 
 typedef struct {
   entity_type_e type;
 
   position_t pos;
-
-  bool c_override;
-  SDL_Color color;
 
   // forced road cell direction, if any
   direction_e direction;

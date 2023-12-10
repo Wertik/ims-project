@@ -6,9 +6,6 @@
 typedef struct {
   position_t pos;
 
-  bool c_override;
-  SDL_Color color;
-
   // previous position
   // - for intersection decisions (don't wanna go back)
   position_t p_pos;

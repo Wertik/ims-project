@@ -17,7 +17,6 @@ car_t *create_car(position_t pos) {
   car->spawned_at = 0;
 
   car->speed = (position_t){.x = 0, .y = 0};
-  car->c_override = false;
 
   car->nav = NULL;
   car->nav_count = 0;

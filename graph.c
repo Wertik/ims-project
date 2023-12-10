@@ -180,8 +180,7 @@ void render_dir_indicator(SDL_Renderer *renderer, cord_t pos_x, cord_t pos_y,
 
 void render_entity(SDL_Renderer *renderer, entity_t *entity, SDL_Color color,
                    bool padding) {
-  SDL_Color real_color = entity->c_override ? entity->color : color;
-  SDL_SetRenderDrawColor(renderer, RGBA(real_color));
+  SDL_SetRenderDrawColor(renderer, RGBA(color));
 
   SDL_Rect rect = {.x = entity->pos.x * CELL_SIZE,
                    .y = entity->pos.y * CELL_SIZE,
@@ -257,8 +256,7 @@ void draw(SDL_Renderer *renderer, simulation_data_t *data) {
       car_color = CAR_LEAVING_COLOR;
     }
 
-    SDL_Color real_color = car->c_override ? car->color : car_color;
-    SDL_SetRenderDrawColor(renderer, RGBA(real_color));
+    SDL_SetRenderDrawColor(renderer, RGBA(car_color));
 
     SDL_Rect rect = {.x = car->pos.x * CELL_SIZE,
                      .y = car->pos.y * CELL_SIZE,

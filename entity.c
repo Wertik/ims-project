@@ -120,7 +120,6 @@ entity_t *create_entity(position_t pos) {
   MERROR(entity);
 
   entity->pos = pos;
-  entity->c_override = false;
 
   return entity;
 }
@@ -132,7 +131,6 @@ e_road_t *create_road_entity(position_t pos) {
   road->pos = pos;
   road->type = EMPTY_ROAD;
   road->direction = DIR_COUNT;
-  road->c_override = false;
 
   return road;
 }
