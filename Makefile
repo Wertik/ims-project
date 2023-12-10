@@ -14,6 +14,8 @@ TEST_OBJECTS=$(subst .c,.o,$(TEST_SOURCES))
 CFLAGS=-g -Wall -Wextra -pedantic
 LDFLAGS=-lSDL2 -lm
 
+RESULTS_FILE=results.csv
+
 .PHONY: all
 
 all: $(TARGET) $(TEST_TARGET)
@@ -31,11 +33,13 @@ run: $(TARGET)
 	./$(TARGET) $(ARGS)
 
 clean:
-	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) sdl.o
+	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) $(RESULTS_FILE) sdl.o
 
 simulation: $(TARGET)
-	rm -f results.txt
+	rm -f $(RESULTS_FILE)
+	echo "simulation_count,avg_until_parked,avg_until_leave,avg_inter_wait,perc_left_without_park" >> $(RESULTS_FILE) 
 	for i in 10 30 50 80 100 200 400 600 1000 1500; do \
-		echo "Simulace count=$$i:" >> results.txt; \
-		./$(TARGET) -l -m 3 -s 0 -c $$i >> results.txt; \
+		echo "Running for $$i cars"; \
+		echo -n "$$i," >> $(RESULTS_FILE); \
+		./$(TARGET) -l -m 3 -s 0 -c $$i -v >> $(RESULTS_FILE); \
 	done

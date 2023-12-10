@@ -49,9 +49,16 @@ stats_t *calculate_stats(simulation_data_t *data) {
   return stats;
 }
 
-void print_stats(stats_t *stats) {
-  printf("avg_until_parked=%.03f\n", stats->avg_until_parked);
-  printf("avg_until_leave=%.03f\n", stats->avg_until_leave);
-  printf("avg_inter_wait=%.03f\n", stats->avg_inter_wait);
-  printf("perc_left_without_park=%.03f\n", stats->perc_left_without_park * 100.0);
+void print_stats(stats_t *stats, bool csv) {
+  if (csv == true) {
+    printf("%.03f,%.03f,%.03f,%.03f\n", stats->avg_until_parked,
+           stats->avg_until_leave, stats->avg_inter_wait,
+           stats->perc_left_without_park * 100.0);
+  } else {
+    printf("avg_until_parked=%.03f\n", stats->avg_until_parked);
+    printf("avg_until_leave=%.03f\n", stats->avg_until_leave);
+    printf("avg_inter_wait=%.03f\n", stats->avg_inter_wait);
+    printf("perc_left_without_park=%.03f\n",
+           stats->perc_left_without_park * 100.0);
+  }
 }

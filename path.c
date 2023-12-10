@@ -214,10 +214,11 @@ int main(int argc, char *argv[]) {
   bool start_paused = false;
   int sim_speed = 400;
   bool graph = true;
+  bool csv = false;
 
   generator_conf_t gen_conf = {.count = -1, .interval = -1};
 
-  while ((opt = getopt(argc, argv, "phm:s:c:li:")) != -1) {
+  while ((opt = getopt(argc, argv, "phm:s:c:li:v")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -228,7 +229,8 @@ int main(int argc, char *argv[]) {
             "-s SPEED time in ms to wait each tick\n"
             "-c COUNT number of cars to generate\n"
             "-i INTERVAL interval between car generator calls\n"
-            "-l run without a graphical interface\n");
+            "-l run without a graphical interface\n"
+            "-v return the statistics in csv format\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
@@ -238,6 +240,10 @@ int main(int argc, char *argv[]) {
           return EXIT_FAILURE;
         }
         map = m;
+        break;
+      }
+      case 'v': {
+        csv = true;
         break;
       }
       case 's': {
@@ -286,7 +292,7 @@ int main(int argc, char *argv[]) {
   stats_t *stats =
       start_simulation(map, start_paused, graph, sim_speed, gen_conf);
 
-  print_stats(stats);
+  print_stats(stats, csv);
   free_stats(stats);
   return 0;
 }

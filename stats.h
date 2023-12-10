@@ -20,4 +20,4 @@ stats_t *create_stats();
 void free_stats(stats_t *stats);
 
 stats_t *calculate_stats(simulation_data_t *data);
-void print_stats(stats_t *stats);
+void print_stats(stats_t *stats, bool csv);
