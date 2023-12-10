@@ -60,13 +60,11 @@ void start_headless(simulation_data_t *data, int sim_speed, int timeout) {
   }
 }
 
-void start_graph(simulation_data_t *data, int sim_speed, int timeout) {
+void start_graph(simulation_data_t *data, int sim_speed) {
   SDL_Window *window = NULL;
   SDL_Renderer *renderer = NULL;
 
   bool quit = false;
-
-  time_t timeout_at = time(NULL) + timeout;
 
   // initial draw in case the simulation is paused
   initialize_SDL(&window, &renderer);
@@ -163,14 +161,6 @@ void start_graph(simulation_data_t *data, int sim_speed, int timeout) {
     VERBOSE("---\n");
     data->tick += 1;
 
-    if (time(NULL) == timeout_at) {
-      quit = true;
-      fprintf(stderr,
-              "Simulation reached the timeout of %ds, stopping it.\nResults "
-              "are most likely unusable.\n",
-              timeout);
-    }
-
     // run for at least 4 ticks
     // - wait for car generators
     if (quit || should_quit) {
@@ -206,7 +196,7 @@ stats_t *start_simulation(map_e map, bool start_paused, bool graph,
 
   // run the simulation
   if (graph == true) {
-    start_graph(&data, sim_speed, timeout);
+    start_graph(&data, sim_speed);
   } else {
     start_headless(&data, sim_speed, timeout);
   }
