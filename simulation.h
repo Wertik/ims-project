@@ -40,6 +40,8 @@ typedef struct {
   bool paused;
 } simulation_data_t;
 
+bool run(simulation_data_t *data);
+
 bool run_generators(simulation_data_t *data);
 void run_generator(simulation_data_t *data, generator_t *gen);
 

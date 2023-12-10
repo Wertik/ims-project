@@ -63,4 +63,5 @@ void initialize_SDL(SDL_Window **window, SDL_Renderer **renderer);
 
 void close_SDL(SDL_Window *window, SDL_Renderer *renderer);
 
+void start_graph(simulation_data_t *data, int sim_speed);
 void draw(SDL_Renderer *renderer, simulation_data_t *data);

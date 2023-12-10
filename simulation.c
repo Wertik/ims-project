@@ -1,5 +1,17 @@
 #include "simulation.h"
 
+bool run(simulation_data_t *data) {
+  run_inters(data);
+
+  bool cars_left = run_cars(data);
+
+  // run generators last to draw freshly generated cars before they move
+  bool cars_to_generate = run_generators(data);
+
+  // run the simulation until all cars left and there are still cars to generate
+  return !cars_left || cars_to_generate;
+}
+
 // return whether there are still more cars to generate
 bool run_generators(simulation_data_t *data) {
   bool cars_left_to_generate = false;

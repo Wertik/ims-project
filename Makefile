@@ -3,19 +3,30 @@ TEST_TARGET=path_test
 
 CC=gcc
 
-SOURCES=$(shell find . -path '*.c' ! -path './test.c')
 HEADERS=$(shell find . -path '*.h')
 
-OBJECTS=$(subst .c,.o,$(SOURCES))
+PRE_SOURCES=$(shell find . -path '*.c' ! -path './test.c')
+TEST_PRE_SOURCES=$(shell find . -path '*.c' ! -path './path.c')
 
-TEST_SOURCES=$(shell find . -path '*.c' ! -path './path.c')
-TEST_OBJECTS=$(subst .c,.o,$(TEST_SOURCES))
-
+ifdef GRAPH
+  CFLAGS=-g -Wall -Wextra -pedantic -DGRAPH
+  LDFLAGS=-lSDL2 -lm
+  SOURCES=$(PRE_SOURCES)
+  TEST_SOURCES=$(TEST_PRE_SOURCES)
+else
 CFLAGS=-g -Wall -Wextra -pedantic
-LDFLAGS=-lSDL2 -lm
+  LDFLAGS=-lm
+  SOURCES=$(filter-out ./graph.c,$(PRE_SOURCES))
+  TEST_SOURCES=$(filter-out ./graph.c,$(TEST_PRE_SOURCES))
+endif
+
+OBJECTS=$(subst .c,.o,$(SOURCES))
+TEST_OBJECTS=$(subst .c,.o,$(TEST_SOURCES))
 
 MAP_NO_RIGHTWAY_RESULTS_FILE=no_rightway.csv
 MAP_RIGHTWAY_RESULTS_FILE=rightway.csv
+
+ARCHIVE_NAME=T8_xkucaj01_xotrad00
 
 .PHONY: all
 
@@ -34,7 +45,10 @@ run: $(TARGET)
 	./$(TARGET) $(ARGS)
 
 clean:
-	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) $(RESULTS_FILE) sdl.o
+	-rm -rf $(TARGET) $(TEST_TARGET) $(OBJECTS) $(TEST_OBJECTS) $(RESULTS_FILE) $(ARCHIVE_NAME).tar.gz
+
+pack:
+	tar cvzf $(ARCHIVE_NAME).tar.gz *.c *.h Makefile
 
 simulation: $(TARGET)
 	rm -f $(MAP_NO_RIGHTWAY_RESULTS_FILE)

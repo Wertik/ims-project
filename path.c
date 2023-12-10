@@ -1,4 +1,3 @@
-#include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,24 +6,15 @@
 
 #include "builder.h"
 #include "car.h"
-#include "graph.h"
 #include "simulation.h"
 #include "stats.h"
 
+#ifdef GRAPH
+#include "graph.h"
+#endif
+
 extern char *optarg;
 extern int optind, opterr, optopt;
-
-bool run(simulation_data_t *data) {
-  run_inters(data);
-
-  bool cars_left = run_cars(data);
-
-  // run generators last to draw freshly generated cars before they move
-  bool cars_to_generate = run_generators(data);
-
-  // run the simulation until all cars left and there are still cars to generate
-  return !cars_left || cars_to_generate;
-}
 
 void start_headless(simulation_data_t *data, int sim_speed, int timeout) {
   bool quit = false;
@@ -60,121 +50,6 @@ void start_headless(simulation_data_t *data, int sim_speed, int timeout) {
   }
 }
 
-void start_graph(simulation_data_t *data, int sim_speed) {
-  SDL_Window *window = NULL;
-  SDL_Renderer *renderer = NULL;
-
-  bool quit = false;
-
-  // initial draw in case the simulation is paused
-  initialize_SDL(&window, &renderer);
-  draw(renderer, data);
-
-  SDL_Event e;
-  while (!quit) {
-    while (SDL_PollEvent(&e) != 0) {
-      if (e.type == SDL_QUIT) {
-        quit = true;
-      }
-
-      if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE) {
-        data->paused = !data->paused;
-      }
-
-      if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_d) {
-        // -- print information about cars
-
-        VERBOSE("-- Cars (%d)\n", data->cars->size);
-        for (int i = 0; i < data->cars->size; i++) {
-          print_car(data->cars->data[i], true);
-        }
-      }
-
-      // left click prints the location of the cell
-      if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-        int x = e.button.x;
-        int y = e.button.y;
-
-        // get the cell coordinates
-
-        unsigned int pos_x = x / CELL_SIZE;
-        unsigned int pos_y = y / CELL_SIZE;
-
-        VERBOSE("Clicked at [%d;%d]\n", pos_x, pos_y);
-
-        // Print all the entities on this location
-
-        for (unsigned int i = 0; i < data->entities->size; i++) {
-          entity_t *e = data->entities->entities[i];
-
-          if (e->pos.x == pos_x && e->pos.y == pos_y) {
-            print_entity(e, true);
-          }
-        }
-
-        // print cars
-
-        for (int i = 0; i < data->cars->size; i++) {
-          car_t *car = data->cars->data[i];
-
-          if (car->pos.x == pos_x && car->pos.y == pos_y) {
-            print_car(car, true);
-          }
-        }
-
-        // print road info
-        // assume they don't overlap
-
-        road_t *road = get_road(data->roads, (position_t){pos_x, pos_y});
-
-        if (road != NULL) {
-          print_road(road, true);
-        }
-
-        // print intersection info
-        // (only the core info)
-
-        inter_t *inter =
-            get_inter(data->intersections, (position_t){pos_x, pos_y});
-
-        if (inter != NULL) {
-          print_inter(inter, true);
-        }
-      }
-    }
-
-    // no pause when running without GUI - no way to unpause
-    if (data->paused) {
-      continue;
-    }
-
-    VERBOSE("--- Tick #%d\n", data->tick);
-
-    bool should_quit = !run(data);
-
-    draw(renderer, data);
-
-    if (sim_speed != 0) {
-      SDL_Delay(sim_speed);
-    }
-
-    VERBOSE("---\n");
-    data->tick += 1;
-
-    // run for at least 4 ticks
-    // - wait for car generators
-    if (quit || should_quit) {
-      VERBOSE("Stopping...\n");
-      // Pauza pro zobrazení výsledků
-      SDL_Delay(1000);
-      quit = true;
-      continue;
-    }
-  }
-
-  close_SDL(window, renderer);
-}
-
 // run the simulation and return statistics
 stats_t *start_simulation(map_e map, bool start_paused, bool graph,
                           int sim_speed, int timeout,
@@ -196,7 +71,13 @@ stats_t *start_simulation(map_e map, bool start_paused, bool graph,
 
   // run the simulation
   if (graph == true) {
+#ifndef GRAPH
+    fprintf(stderr,
+            "Cannot run a graphical model. Binary not built with SDL2.\n");
+    exit(EXIT_FAILURE);
+#else
     start_graph(&data, sim_speed);
+#endif
   } else {
     start_headless(&data, sim_speed, timeout);
   }
