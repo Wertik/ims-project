@@ -221,10 +221,10 @@ int main(int argc, char *argv[]) {
   int opt;
 
   // options
-  map_e map = SINGLE_INTER;
+  map_e map = PARKING_LOT_RIGHT;
   bool start_paused = false;
-  int sim_speed = 400;
-  bool graph = true;
+  int sim_speed = 0;
+  bool graph = false;
   bool csv = false;
   int runs = 1;
   int timeout = 30;
