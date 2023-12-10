@@ -26,8 +26,10 @@ bool run(simulation_data_t *data) {
   return !cars_left || cars_to_generate;
 }
 
-void start_headless(simulation_data_t *data, int sim_speed) {
+void start_headless(simulation_data_t *data, int sim_speed, int timeout) {
   bool quit = false;
+
+  time_t timeout_at = time(NULL) + timeout;
 
   while (!quit) {
     VERBOSE("--- Tick #%d\n", data->tick);
@@ -41,6 +43,14 @@ void start_headless(simulation_data_t *data, int sim_speed) {
     VERBOSE("---\n");
     data->tick += 1;
 
+    if (time(NULL) == timeout_at) {
+      quit = true;
+      fprintf(stderr,
+              "Simulation reached the timeout of %ds, stopping it.\nResults "
+              "are most likely unusable.\n",
+              timeout);
+    }
+
     if (quit) {
       VERBOSE("Stopping...\n");
       // Pauza pro zobrazení výsledků
@@ -50,11 +60,13 @@ void start_headless(simulation_data_t *data, int sim_speed) {
   }
 }
 
-void start_graph(simulation_data_t *data, int sim_speed) {
+void start_graph(simulation_data_t *data, int sim_speed, int timeout) {
   SDL_Window *window = NULL;
   SDL_Renderer *renderer = NULL;
 
   bool quit = false;
+
+  time_t timeout_at = time(NULL) + timeout;
 
   // initial draw in case the simulation is paused
   initialize_SDL(&window, &renderer);
@@ -124,7 +136,8 @@ void start_graph(simulation_data_t *data, int sim_speed) {
         // print intersection info
         // (only the core info)
 
-        inter_t *inter = get_inter(data->intersections, (position_t){pos_x, pos_y});
+        inter_t *inter =
+            get_inter(data->intersections, (position_t){pos_x, pos_y});
 
         if (inter != NULL) {
           print_inter(inter, true);
@@ -150,6 +163,14 @@ void start_graph(simulation_data_t *data, int sim_speed) {
     VERBOSE("---\n");
     data->tick += 1;
 
+    if (time(NULL) == timeout_at) {
+      quit = true;
+      fprintf(stderr,
+              "Simulation reached the timeout of %ds, stopping it.\nResults "
+              "are most likely unusable.\n",
+              timeout);
+    }
+
     // run for at least 4 ticks
     // - wait for car generators
     if (quit || should_quit) {
@@ -166,7 +187,8 @@ void start_graph(simulation_data_t *data, int sim_speed) {
 
 // run the simulation and return statistics
 stats_t *start_simulation(map_e map, bool start_paused, bool graph,
-                          int sim_speed, generator_conf_t gen_conf) {
+                          int sim_speed, int timeout,
+                          generator_conf_t gen_conf) {
   simulation_data_t data = {.roads = create_road_list(),
                             .entities = create_entity_list(),
                             .intersections = create_inter_list(),
@@ -184,9 +206,9 @@ stats_t *start_simulation(map_e map, bool start_paused, bool graph,
 
   // run the simulation
   if (graph == true) {
-    start_graph(&data, sim_speed);
+    start_graph(&data, sim_speed, timeout);
   } else {
-    start_headless(&data, sim_speed);
+    start_headless(&data, sim_speed, timeout);
   }
 
   // print final statistics
@@ -215,10 +237,11 @@ int main(int argc, char *argv[]) {
   bool graph = true;
   bool csv = false;
   int runs = 1;
+  int timeout = 1000;
 
   generator_conf_t gen_conf = {.count = -1, .interval = -1};
 
-  while ((opt = getopt(argc, argv, "phm:s:c:li:vr:")) != -1) {
+  while ((opt = getopt(argc, argv, "phm:s:c:li:vr:t:")) != -1) {
     switch (opt) {
       case 'h':
         printf(
@@ -231,7 +254,9 @@ int main(int argc, char *argv[]) {
             "-i INTERVAL interval between car generator calls\n"
             "-l run without a graphical interface\n"
             "-v return the statistics in csv format\n"
-            "-r RUNS how many runs of the simulation to do, statistics are averaged out\n");
+            "-r RUNS how many runs of the simulation to do, statistics are "
+            "averaged out\n"
+            "-t TIMEOUT timeout in seconds when to stop the simulation\n");
         return EXIT_SUCCESS;
       case 'm': {
         int m = atoi(optarg);
@@ -283,6 +308,15 @@ int main(int argc, char *argv[]) {
         gen_conf.interval = i;
         break;
       }
+      case 't': {
+        int t = atoi(optarg);
+        if (t <= 0) {
+          fprintf(stderr, "timeout should be in <1; MAX_INT>\n");
+          return EXIT_FAILURE;
+        }
+        timeout = t;
+        break;
+      }
       case 'l':
         graph = false;
         break;
@@ -300,14 +334,15 @@ int main(int argc, char *argv[]) {
 
   stats_t *final_stats = create_stats();
 
-  stats_t **stat_list = (stats_t**)malloc(sizeof(stats_t*) * runs);
+  stats_t **stat_list = (stats_t **)malloc(sizeof(stats_t *) * runs);
   MERROR(stat_list);
-  memset(stat_list, 0, sizeof(stats_t*) * runs);
+  memset(stat_list, 0, sizeof(stats_t *) * runs);
 
   // run the simulation(s)!
   for (int run = 0; run < runs; run++) {
     VERBOSE("Start run #%d\n", run);
-    stat_list[run] = start_simulation(map, start_paused, graph, sim_speed, gen_conf);
+    stat_list[run] = start_simulation(map, start_paused, graph, sim_speed,
+                                      timeout, gen_conf);
     VERBOSE("End run #%d\n", run);
   }
 
@@ -336,7 +371,8 @@ int main(int argc, char *argv[]) {
   final_stats->avg_inter_wait = sum_avg_inter_wait / (float)runs;
   final_stats->avg_until_leave = sum_avg_until_leave / (float)runs;
   final_stats->avg_until_parked = sum_avg_until_parked / (float)runs;
-  final_stats->perc_left_without_park = sum_perc_left_without_park / (float)runs;
+  final_stats->perc_left_without_park =
+      sum_perc_left_without_park / (float)runs;
 
   print_stats(final_stats, csv);
 
