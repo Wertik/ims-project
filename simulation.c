@@ -8,7 +8,7 @@ void run_generators(simulation_data_t *data) {
 }
 
 void run_generator(simulation_data_t *data, generator_t *gen) {
-  if (data->tick % gen->interval == 0 &&
+  if (gen->last_gen_at + gen->next_gen == data->tick &&
       (gen->gen_count < gen->count || gen->count == -1)) {
     if (get_car(data->cars, gen->pos) != NULL) {
       VERBOSE("cannot generate on [%d;%d], spot occupied.\n", gen->pos.x,
@@ -17,6 +17,8 @@ void run_generator(simulation_data_t *data, generator_t *gen) {
     }
 
     gen->gen_count += 1;
+    gen->last_gen_at = data->tick;
+    gen->next_gen = generate_next_tick(gen);
 
     car_t *car = create_car(gen->pos);
     car->spawned_at = data->tick;
@@ -176,16 +178,13 @@ end:
   return !cars_left;
 }
 
-// Function for generating exponential numbers in the [0,1) range
-double generate_exponential() { return -log(1.0 - (double)rand() / RAND_MAX); }
-
 // Function to simulate shopping time in ticks
 int simulate_shopping_time() {
   // Average shopping time in minutes
-  int average_shopping_time = CAR_PARKED_TICKS;
+  int average_shopping_time = AVERAGE_SHOPPING_TIME;
 
-  // Convert to ticks (1 minute = 10 ticks)
-  int average_shopping_ticks = average_shopping_time * 10;
+  // Convert to ticks
+  int average_shopping_ticks = average_shopping_time * TICKS_PER_MINUTE;
 
   // Generate exponential shopping time in ticks
   double exponential_time = generate_exponential();

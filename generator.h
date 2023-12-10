@@ -9,6 +9,11 @@ typedef struct {
   // how many cars to generate
   int count;
 
+  // time of next generation
+  int next_gen;
+  // time of last generation trigger
+  int last_gen_at;
+
   // how many cars were already generated
   int gen_count;
 
@@ -25,6 +30,9 @@ typedef struct {
   int size;
   generator_t **data;
 } gen_list_t;
+
+// get the time in ticks until next car gets generated according to an exponential distribution
+int generate_next_tick(generator_t *gen);
 
 generator_t *create_gen(position_t pos, int interval, int count);
 void free_gen(generator_t *gen);

@@ -1,5 +1,12 @@
 #include "generator.h"
 
+int generate_next_tick(generator_t *gen) {
+  double exp = generate_exponential();
+
+  // round and offset by one, cannot generate with 0 delay
+  return (int)(exp * gen->interval) + 1;
+}
+
 generator_t *create_gen(position_t pos, int interval, int count) {
   generator_t *gen = (generator_t *)malloc(sizeof(generator_t));
   MERROR(gen);
@@ -9,6 +16,9 @@ generator_t *create_gen(position_t pos, int interval, int count) {
 
   gen->count = count;
   gen->gen_count = 0;
+
+  gen->next_gen = generate_next_tick(gen);
+  gen->last_gen_at = 0;
 
   return gen;
 }

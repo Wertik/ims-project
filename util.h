@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <stdlib.h>
 
 #define MERROR(VAR)       \
   do {                    \
@@ -31,3 +33,5 @@
 
 // verbose helper fn to allow empty vargs
 void verbose(const char* fmt, ...);
+
+double generate_exponential();
