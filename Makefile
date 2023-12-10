@@ -39,7 +39,7 @@ clean:
 simulation: $(TARGET)
 	rm -f $(MAP_NO_RIGHTWAY_RESULTS_FILE)
 	echo "simulation_count,avg_until_parked,avg_until_leave,avg_inter_wait,perc_left_without_park" >> $(MAP_NO_RIGHTWAY_RESULTS_FILE) 
-	for i in 10 30 50 80 100 200 400 600 1000 1500; do \
+	for i in 10 30 50 100 200 400 600 1000 1500 3000; do \
 		echo "Running for $$i cars"; \
 		echo -n "$$i," >> $(MAP_NO_RIGHTWAY_RESULTS_FILE); \
 		./$(TARGET) -l -m 3 -s 0 -c $$i -v >> $(MAP_NO_RIGHTWAY_RESULTS_FILE); \
@@ -47,7 +47,7 @@ simulation: $(TARGET)
 
 	rm -f $(MAP_RIGHTWAY_RESULTS_FILE)
 	echo "simulation_count,avg_until_parked,avg_until_leave,avg_inter_wait,perc_left_without_park" >> $(MAP_RIGHTWAY_RESULTS_FILE) 
-	for i in 10 30 50 80 100 200 400 600 1000 1500; do \
+	for i in 10 30 50 100 200 400 600 1000 1500 3000; do \
 		echo "Running for $$i cars"; \
 		echo -n "$$i," >> $(MAP_RIGHTWAY_RESULTS_FILE); \
 		./$(TARGET) -l -m 4 -s 0 -c $$i -v >> $(MAP_RIGHTWAY_RESULTS_FILE); \
