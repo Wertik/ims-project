@@ -56,7 +56,7 @@ simulation: $(TARGET)
 	for i in 10 30 50 100 200 400 600 1000 1500 3000; do \
 		echo "Running for $$i cars"; \
 		echo -n "$$i," >> $(MAP_RIGHTWAY_RESULTS_FILE); \
-		./$(TARGET) -l -m 3 -s 0 -c $$i -v >> $(MAP_NO_RIGHTWAY_RESULTS_FILE); \
+		./$(TARGET) -m 3 -s 0 -c $$i -v >> $(MAP_NO_RIGHTWAY_RESULTS_FILE); \
 	done
 
 	rm -f $(MAP_RIGHTWAY_RESULTS_FILE)
@@ -64,5 +64,5 @@ simulation: $(TARGET)
 	for i in 10 30 50 100 200 400 600 1000 1500 3000; do \
 		echo "Running for $$i cars"; \
 		echo -n "$$i," >> $(MAP_NO_RIGHTWAY_RESULTS_FILE); \
-		./$(TARGET) -l -m 4 -s 0 -c $$i -v >> $(MAP_RIGHTWAY_RESULTS_FILE); \
+		./$(TARGET) -m 4 -s 0 -c $$i -v >> $(MAP_RIGHTWAY_RESULTS_FILE); \
 	done
