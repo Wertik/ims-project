@@ -21,7 +21,7 @@
 #define CELL_SIZE 20
 
 // average time spent shopping in minutes
-#define AVERAGE_SHOPPING_TIME 100
+#define AVERAGE_SHOPPING_TIME 26
 // how many ticks make up one minute
 #define TICKS_PER_MINUTE 10
 

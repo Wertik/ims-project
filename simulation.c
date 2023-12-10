@@ -190,7 +190,7 @@ int simulate_shopping_time() {
   double exponential_time = generate_exponential();
 
   // Round and return the result
-  return (int)(exponential_time * average_shopping_ticks);
+  return (int)((0.5 + exponential_time) * average_shopping_ticks);
 }
 
 void run_car(simulation_data_t *data, car_t *car) {
