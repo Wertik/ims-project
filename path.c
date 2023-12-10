@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
             "-s SPEED time in ms to wait each tick\n"
             "-c COUNT number of cars to generate\n"
             "-i INTERVAL interval between car generator calls\n"
-            "-l run without a graphical interface\n"
+            "-l run with a graphical interface\n"
             "-v return the statistics in csv format\n"
             "-r RUNS how many runs of the simulation to do, statistics are "
             "averaged out\n"
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
         break;
       }
       case 'l':
-        graph = false;
+        graph = true;
         break;
       case 'p':
         start_paused = true;
